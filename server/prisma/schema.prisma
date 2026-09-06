@@ -62,6 +62,7 @@ model Route {
 model Delivery {
   id          String   @id @default(cuid())
   userId      String
+  clientId    String?
   routeId     String?
   addressId   String?
   packageNo   String?
@@ -78,6 +79,7 @@ model Delivery {
   route       Route?   @relation(fields: [routeId], references: [id], onDelete: SetNull)
   address     Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
 
+  @@unique([userId, clientId])
   @@index([userId, deliveredAt])
   @@index([routeId, status])
 }
