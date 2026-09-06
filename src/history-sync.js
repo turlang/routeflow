@@ -1,0 +1,18 @@
+import{apiBase,hasSession,listDeliveries,importDeliveries}from'./api.js';
+
+const HISTORY_KEY='routeflow.deliveryHistory.v1';
+const read=()=>{try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]')}catch{return[]}};
+const write=value=>localStorage.setItem(HISTORY_KEY,JSON.stringify(value.slice(0,1000)));
+const enabled=()=>Boolean(apiBase()&&hasSession());
+const packageValue=value=>String(value||'').replace(/^N°\s*Pacote:\s*/i,'').trim();
+const sizeValue=value=>['Pequeno','Médio','Grande'].includes(value)?value:undefined;
+const localToRemote=x=>({clientId:String(x.id),address:x.address,packageNo:packageValue(x.package)||undefined,size:sizeValue(x.size),status:'DELIVERED',deliveredAt:x.timestamp,latitude:Number.isFinite(x.latitude)?x.latitude:undefined,longitude:Number.isFinite(x.longitude)?x.longitude:undefined,accuracy:Number.isFinite(x.accuracy)?x.accuracy:undefined,notes:x.deliveries||undefined});
+const remoteToLocal=x=>{const when=new Date(x.deliveredAt||x.createdAt),address=x.address?.address||'';return{id:x.clientId||`server-${x.id}`,serverId:x.id,timestamp:when.toISOString(),date:when.toLocaleDateString('pt-BR'),time:when.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),route:'Entrega sincronizada',package:`N° Pacote: ${x.packageNo||'não informado'}`,address,deliveries:x.notes||'Entrega concluída',placeType:x.address?.type||'Casa',size:x.size||'',latitude:x.latitude,longitude:x.longitude,accuracy:x.accuracy}};
+
+export async function pushLocalHistory(){const local=read().filter(x=>x.id&&x.timestamp&&x.address);if(!enabled()||!local.length)return{mode:'local',total:local.length};const result=await importDeliveries(local.map(localToRemote));return{mode:'cloud',...result}}
+
+export async function pullDeliveryHistory(){if(!enabled())return{mode:'local',count:read().length};const remote=await listDeliveries(),local=read(),byId=new Map(local.map(x=>[String(x.id),x]));for(const item of remote){const converted=remoteToLocal(item);const old=byId.get(String(converted.id));byId.set(String(converted.id),old?{...converted,...old,serverId:item.id}:converted)}const merged=[...byId.values()].sort((a,b)=>String(b.timestamp).localeCompare(String(a.timestamp))).slice(0,1000);write(merged);window.dispatchEvent(new CustomEvent('routeflow:history-synced'));return{mode:'cloud',count:remote.length}}
+
+export async function syncDeliveryHistory(){if(!enabled())return{mode:'local',count:read().length};const pushed=await pushLocalHistory();const pulled=await pullDeliveryHistory();return{mode:'cloud',pushed,pulled}}
+
+export async function syncHistoryEntry(entry){if(!entry?.id)return;if(!enabled())return{mode:'local'};const result=await importDeliveries([localToRemote(entry)]);await pullDeliveryHistory();return{mode:'cloud',...result}}
