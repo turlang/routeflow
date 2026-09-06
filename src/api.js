@@ -33,4 +33,5 @@ export const importAddresses=addresses=>api('/v1/addresses/import',{method:'POST
 export const updateAddress=(id,body)=>api(`/v1/addresses/${encodeURIComponent(id)}`,{method:'PATCH',body});
 export const listDeliveries=()=>api('/v1/deliveries');
 export const createDelivery=body=>api('/v1/deliveries',{method:'POST',body});
+export const importDeliveries=deliveries=>api('/v1/deliveries/import',{method:'POST',body:{deliveries}});
 export const listRoutes=()=>api('/v1/routes');
