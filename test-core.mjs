@@ -1,0 +1,4 @@
+import assert from 'node:assert/strict';import{normalizeStreet,groupStops,fallbackMatrix,optimizeOrder,flattenRoute,routeMetrics}from'./src/core.js';
+assert.equal(normalizeStreet('Avenida José César de Oliveira, 85'),'jose cesar de oliveira');
+const rows=[{Latitude:0,Longitude:0,'Destination Address':'Rua A, 1',id:1},{Latitude:0,Longitude:0,'Destination Address':'Rua A, 1',id:2},{Latitude:0,Longitude:.01,'Destination Address':'Rua A, 2',id:3},{Latitude:0,Longitude:.02,'Destination Address':'Rua B, 1',id:4}];
+const stops=groupStops(rows);assert.equal(stops.length,3);const m=fallbackMatrix(stops);const order=optimizeOrder(stops,m,0);assert.equal(order.length,3);const flat=flattenRoute(stops,order);assert.equal(flat.length,4);assert.deepEqual(flat.map(x=>x['Optimized Sequence']),[1,2,3,4]);assert.equal(routeMetrics(order,m,stops).reentries,0);console.log('core tests: OK');
