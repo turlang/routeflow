@@ -8,15 +8,21 @@ datasource db {
 }
 
 model User {
-  id           String    @id @default(cuid())
-  name         String?
-  email        String    @unique
-  passwordHash String
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  addresses    Address[]
-  deliveries   Delivery[]
-  routes       Route[]
+  id                 String    @id @default(cuid())
+  name               String?
+  email              String    @unique
+  passwordHash       String
+  plan               String    @default("FREE")
+  subscriptionStatus String    @default("INACTIVE")
+  billingCustomerId  String?
+  billingPeriodEnd   DateTime?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+  addresses          Address[]
+  deliveries         Delivery[]
+  routes             Route[]
+
+  @@index([plan, subscriptionStatus])
 }
 
 model Address {
