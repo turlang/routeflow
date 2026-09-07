@@ -66,24 +66,27 @@ model Route {
 }
 
 model Delivery {
-  id          String   @id @default(cuid())
-  userId      String
-  clientId    String?
-  routeId     String?
-  addressId   String?
-  packageNo   String?
-  size        String?
-  status      String   @default("PENDING")
-  deliveredAt DateTime?
-  latitude    Float?
-  longitude   Float?
-  accuracy    Float?
-  notes       String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  route       Route?   @relation(fields: [routeId], references: [id], onDelete: SetNull)
-  address     Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
+  id            String   @id @default(cuid())
+  userId        String
+  clientId      String?
+  routeId       String?
+  addressId     String?
+  packageNo     String?
+  size          String?
+  status        String   @default("PENDING")
+  deliveredAt   DateTime?
+  latitude      Float?
+  longitude     Float?
+  accuracy      Float?
+  notes         String?
+  failureReason String?
+  recipientName String?
+  proofPhotoUrl String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  route         Route?   @relation(fields: [routeId], references: [id], onDelete: SetNull)
+  address       Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
 
   @@unique([userId, clientId])
   @@index([userId, deliveredAt])
