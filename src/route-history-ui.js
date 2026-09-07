@@ -3,7 +3,7 @@ const KEY='routeflow.routeHistory.v1';
 const $=id=>document.getElementById(id);
 const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'[]')}catch{return[]}};
 const write=v=>localStorage.setItem(KEY,JSON.stringify(v.slice(0,500)));
-const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot',"'":'&#39;'}[c]));
+const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtDate=v=>v?new Date(v).toLocaleDateString('pt-BR'):'-';
 const fmtTime=v=>v?new Date(v).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}):'-';
 const duration=r=>{if(!r.startedAt||!r.finishedAt)return'-';const m=Math.max(0,Math.round((new Date(r.finishedAt)-new Date(r.startedAt))/60000)),h=Math.floor(m/60);return h?`${h}h ${String(m%60).padStart(2,'0')}min`:`${m} min`};
