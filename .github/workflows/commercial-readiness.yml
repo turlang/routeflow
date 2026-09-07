@@ -15,15 +15,18 @@ jobs:
           node-version: '22'
       - name: Install dependencies
         working-directory: server
-        run: npm ci
+        run: npm install --no-audit --no-fund
       - name: Validate Prisma
         working-directory: server
         env:
           DATABASE_URL: postgresql://routeflow:routeflow@localhost:5432/routeflow
         run: npx prisma validate
+      - name: Generate Prisma client
+        working-directory: server
+        env:
+          DATABASE_URL: postgresql://routeflow:routeflow@localhost:5432/routeflow
+        run: npx prisma generate
       - name: Check JavaScript syntax
         run: |
           node --check server/src/server.js
-          node --check src/main.js
-          node --check src/api.js
-          node --check src/history-sync.js
+          for file in src/*.js; do node --check "$file"; done
