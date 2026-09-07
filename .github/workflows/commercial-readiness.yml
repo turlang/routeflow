@@ -1,0 +1,29 @@
+name: RouteFlow Commercial Readiness
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        working-directory: server
+        run: npm ci
+      - name: Validate Prisma
+        working-directory: server
+        env:
+          DATABASE_URL: postgresql://routeflow:routeflow@localhost:5432/routeflow
+        run: npx prisma validate
+      - name: Check JavaScript syntax
+        run: |
+          node --check server/src/server.js
+          node --check src/main.js
+          node --check src/api.js
+          node --check src/history-sync.js
