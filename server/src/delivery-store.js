@@ -1,0 +1,2 @@
+export const deliveryData=(item,addressId)=>{const{address,...data}=item;return{...data,addressId,deliveredAt:data.deliveredAt?new Date(data.deliveredAt):undefined}};
+export async function saveDelivery({db,userId,item,addressId}){const data=deliveryData(item,addressId);if(data.clientId){const existing=await db.delivery.findUnique({where:{userId_clientId:{userId,clientId:data.clientId}}});if(existing)return{delivery:await db.delivery.update({where:{id:existing.id},data}),created:false}}return{delivery:await db.delivery.create({data:{...data,userId}}),created:true}}
