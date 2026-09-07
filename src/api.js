@@ -1,9 +1,10 @@
 const CONFIG_KEY='routeflow.apiBaseUrl.v1';
 const TOKEN_KEY='routeflow.authToken.v1';
 const USER_KEY='routeflow.authUser.v1';
+const PRODUCTION_API='https://routeflow-api-tz5q.onrender.com';
 
 const localFrontend=()=>['localhost','127.0.0.1'].includes(window.location.hostname);
-const defaultApiBase=()=>localFrontend()?'http://localhost:3001':'';
+const defaultApiBase=()=>localFrontend()?'http://localhost:3001':PRODUCTION_API;
 export const apiBase=()=>localStorage.getItem(CONFIG_KEY)||defaultApiBase();
 export const setApiBase=value=>localStorage.setItem(CONFIG_KEY,String(value||'').replace(/\/$/,''));
 export const authToken=()=>localStorage.getItem(TOKEN_KEY)||'';
