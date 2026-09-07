@@ -2,7 +2,9 @@ const CONFIG_KEY='routeflow.apiBaseUrl.v1';
 const TOKEN_KEY='routeflow.authToken.v1';
 const USER_KEY='routeflow.authUser.v1';
 
-export const apiBase=()=>localStorage.getItem(CONFIG_KEY)||'';
+const localFrontend=()=>['localhost','127.0.0.1'].includes(window.location.hostname);
+const defaultApiBase=()=>localFrontend()?'http://localhost:3001':'';
+export const apiBase=()=>localStorage.getItem(CONFIG_KEY)||defaultApiBase();
 export const setApiBase=value=>localStorage.setItem(CONFIG_KEY,String(value||'').replace(/\/$/,''));
 export const authToken=()=>localStorage.getItem(TOKEN_KEY)||'';
 export const authUser=()=>{try{return JSON.parse(localStorage.getItem(USER_KEY)||'null')}catch{return null}};
