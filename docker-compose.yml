@@ -7,8 +7,6 @@ services:
       POSTGRES_DB: routeflow
       POSTGRES_USER: routeflow
       POSTGRES_PASSWORD: routeflow_dev
-    ports:
-      - "55432:5432"
     volumes:
       - routeflow_postgres_data:/var/lib/postgresql/data
     healthcheck:
