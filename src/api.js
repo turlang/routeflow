@@ -33,5 +33,6 @@ export const listDeliveries=()=>api('/v1/deliveries');
 export const createDelivery=body=>api('/v1/deliveries',{method:'POST',body});
 export const importDeliveries=deliveries=>api('/v1/deliveries/import',{method:'POST',body:{deliveries}});
 export const listRoutes=()=>api('/v1/routes');
+export const getActiveRoute=()=>api('/v1/routes/active');
 export const createRoute=body=>api('/v1/routes',{method:'POST',body});
 export const updateRoute=(id,body)=>api(`/v1/routes/${encodeURIComponent(id)}`,{method:'PATCH',body});
