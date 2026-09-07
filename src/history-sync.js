@@ -1,15 +1,19 @@
 import{apiBase,hasSession,listDeliveries,importDeliveries}from'./api.js';
 
-const HISTORY_KEY='routeflow.deliveryHistory.v1';
-const read=()=>{try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||'[]')}catch{return[]}};
-const write=value=>localStorage.setItem(HISTORY_KEY,JSON.stringify(value.slice(0,1000)));
+const HISTORY_KEY='routeflow.deliveryHistory.v1',OUTBOX_KEY='routeflow.deliveryOutbox.v1';
+const readKey=(key,fallback=[])=>{try{return JSON.parse(localStorage.getItem(key)||JSON.stringify(fallback))}catch{return fallback}};
+const writeKey=(key,value)=>localStorage.setItem(key,JSON.stringify(value.slice(0,1000)));
+const read=()=>readKey(HISTORY_KEY),write=value=>writeKey(HISTORY_KEY,value),readOutbox=()=>readKey(OUTBOX_KEY),writeOutbox=value=>{writeKey(OUTBOX_KEY,value);window.dispatchEvent(new CustomEvent('routeflow:sync-state',{detail:{pending:value.length}}))};
 const enabled=()=>Boolean(apiBase()&&hasSession());
 const packageValue=value=>String(value||'').replace(/^N°\s*Pacote:\s*/i,'').trim();
 const sizeValue=value=>['Pequeno','Médio','Grande'].includes(value)?value:undefined;
 const localToRemote=x=>({clientId:String(x.id),address:x.address,packageNo:packageValue(x.package)||undefined,size:sizeValue(x.size),status:x.status||'DELIVERED',deliveredAt:x.timestamp,latitude:Number.isFinite(x.latitude)?x.latitude:undefined,longitude:Number.isFinite(x.longitude)?x.longitude:undefined,accuracy:Number.isFinite(x.accuracy)?x.accuracy:undefined,notes:x.deliveries||undefined,failureReason:x.failureReason||undefined,recipientName:x.recipientName||undefined,proofPhotoUrl:x.proofPhotoUrl||undefined});
 const remoteToLocal=x=>{const when=new Date(x.deliveredAt||x.createdAt),address=x.address?.address||'';return{id:x.clientId||`server-${x.id}`,serverId:x.id,timestamp:when.toISOString(),date:when.toLocaleDateString('pt-BR'),time:when.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',second:'2-digit'}),route:'Entrega sincronizada',package:`N° Pacote: ${x.packageNo||'não informado'}`,address,deliveries:x.notes||'Atendimento registrado',placeType:x.address?.type||'Casa',size:x.size||'',latitude:x.latitude,longitude:x.longitude,accuracy:x.accuracy,status:x.status||'DELIVERED',failureReason:x.failureReason||'',recipientName:x.recipientName||'',proofPhotoUrl:x.proofPhotoUrl||''}};
-
+const enqueue=entry=>{if(!entry?.id)return;const queue=readOutbox(),id=String(entry.id),next=[entry,...queue.filter(x=>String(x.id)!==id)];writeOutbox(next);return next.length};
+export const deliverySyncState=()=>({pending:readOutbox().length,online:navigator.onLine,connected:enabled()});
+export async function flushDeliveryOutbox(){const queue=readOutbox();if(!queue.length)return{mode:enabled()?'cloud':'local',pending:0};if(!enabled()||!navigator.onLine)return{mode:'local',pending:queue.length};try{const result=await importDeliveries(queue.map(localToRemote));writeOutbox([]);return{mode:'cloud',pending:0,...result}}catch(error){return{mode:'local',pending:queue.length,error:String(error?.message||error)}}}
 export async function pushLocalHistory(){const local=read().filter(x=>x.id&&x.timestamp&&x.address);if(!enabled()||!local.length)return{mode:'local',total:local.length};const result=await importDeliveries(local.map(localToRemote));return{mode:'cloud',...result}}
 export async function pullDeliveryHistory(){if(!enabled())return{mode:'local',count:read().length};const remote=await listDeliveries(),local=read(),byId=new Map(local.map(x=>[String(x.id),x]));for(const item of remote){const converted=remoteToLocal(item);const old=byId.get(String(converted.id));byId.set(String(converted.id),old?{...converted,...old,serverId:item.id}:converted)}const merged=[...byId.values()].sort((a,b)=>String(b.timestamp).localeCompare(String(a.timestamp))).slice(0,1000);write(merged);window.dispatchEvent(new CustomEvent('routeflow:history-synced'));return{mode:'cloud',count:remote.length}}
-export async function syncDeliveryHistory(){if(!enabled())return{mode:'local',count:read().length};const pushed=await pushLocalHistory();const pulled=await pullDeliveryHistory();return{mode:'cloud',pushed,pulled}}
-export async function syncHistoryEntry(entry){if(!entry?.id)return;if(!enabled())return{mode:'local'};const result=await importDeliveries([localToRemote(entry)]);await pullDeliveryHistory();return{mode:'cloud',...result}}
+export async function syncDeliveryHistory(){if(!enabled())return{mode:'local',count:read().length};await flushDeliveryOutbox();const pushed=await pushLocalHistory(),pulled=await pullDeliveryHistory();return{mode:'cloud',pushed,pulled}}
+export async function syncHistoryEntry(entry){if(!entry?.id)return;if(!enabled()||!navigator.onLine){enqueue(entry);return{mode:'local',pending:readOutbox().length}}try{const result=await importDeliveries([localToRemote(entry)]);const queue=readOutbox().filter(x=>String(x.id)!==String(entry.id));writeOutbox(queue);return{mode:'cloud',...result}}catch(error){enqueue(entry);return{mode:'local',pending:readOutbox().length,error:String(error?.message||error)}}}
+window.addEventListener('online',()=>flushDeliveryOutbox().then(()=>pullDeliveryHistory()).catch(()=>{}));
