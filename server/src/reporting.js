@@ -1,0 +1,2 @@
+import{deliveryMetrics,routeMetrics}from'./metrics.js';
+export async function reportingSummary(db,userId,{days=30}={}){const safeDays=Math.max(1,Math.min(365,Number(days)||30)),since=new Date(Date.now()-safeDays*86400000);const[deliveries,routes]=await Promise.all([db.delivery.findMany({where:{userId,createdAt:{gte:since}},select:{status:true}}),db.route.findMany({where:{userId,createdAt:{gte:since}},select:{status:true,plannedKm:true}})]);return{periodDays:safeDays,since:since.toISOString(),deliveries:deliveryMetrics(deliveries),routes:routeMetrics(routes)}}
