@@ -1,6 +1,6 @@
 # RouteFlow — Development State
 
-Updated: 2026-09-07 23:12 BRT
+Updated: 2026-09-07 23:25 BRT
 Target: RouteFlow 1.0 Commercial Beta
 Branch: `main`
 
@@ -15,15 +15,16 @@ Deliver a mobile-first routing SaaS that turns delivery spreadsheets into an opt
 - Address registry, authentication, PostgreSQL backend, route history and cross-device active-route resume.
 - Proof of Delivery model, migration and idempotent cloud upsert.
 - One terminal Delivery record per spreadsheet package with stable client IDs.
-- Per-package Proof editor for multi-package physical stops, including independent delivered/failed outcome, recipient and mandatory failure reason.
-- Offline delivery outbox and automatic retry.
+- Multi-package Proof editor now hides conflicting common status/recipient controls, resets state on close, parses package labels from the dedicated summary and enforces an independent failure reason for every failed package.
+- Offline delivery outbox, automatic retry and visible History sync state with pending counter/manual retry.
 - SaaS plans/entitlements with server-side monthly route and stop limits.
 - Provider-neutral subscription event normalization and authenticated billing webhook boundary; live provider remains disabled without credentials.
 - API throttling, stricter auth throttling, payload limits and database readiness endpoint.
 - Address/coordinate validation before routing.
-- Functional account reporting dashboard in History: 30-day deliveries, success rate, failed deliveries, completed/active routes and planned kilometers. It derives from authenticated production delivery/route endpoints, avoiding a release dependency on a not-yet-mounted reporting endpoint.
+- Functional account reporting dashboard in History: 30-day deliveries, success rate, failed deliveries, completed/active routes and planned kilometers.
 - Backend operational metrics/reporting modules and unit tests remain available for future server-side aggregation.
-- PWA shell cache hardened: navigation-only HTML fallback, complete package-proof/reporting module cache and dedicated reporting stylesheet.
+- Routing input normalization/OSRM serialization now has automated unit coverage.
+- PWA shell cache hardened: navigation-only HTML fallback, package proof, reporting and sync-status modules cached; cache version v4.
 - Production operations runbook covers health/readiness, backup, restore drill, incidents, secrets and release gate.
 - Recurring SaaS business plan, technical Terms and LGPD Privacy drafts.
 - Commercial readiness CI validates Prisma, every backend/frontend JS module, unit tests, PWA and release artifacts.
