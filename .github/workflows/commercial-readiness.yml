@@ -29,4 +29,13 @@ jobs:
       - name: Check JavaScript syntax
         run: |
           node --check server/src/server.js
+          node --check server/src/delivery-store.js
+          node --check sw.js
           for file in src/*.js; do node --check "$file"; done
+      - name: Validate release artifacts
+        run: |
+          test -f manifest.webmanifest
+          test -f PRIVACY.md
+          test -f TERMS.md
+          test -f DEVELOPMENT_STATE.md
+          node -e "JSON.parse(require('fs').readFileSync('manifest.webmanifest','utf8'))"
