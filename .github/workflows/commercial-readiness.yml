@@ -28,9 +28,7 @@ jobs:
         run: npx prisma generate
       - name: Check JavaScript syntax
         run: |
-          node --check server/src/server.js
-          node --check server/src/delivery-store.js
-          node --check server/src/entitlements.js
+          for file in server/src/*.js; do node --check "$file"; done
           node --check sw.js
           for file in src/*.js; do node --check "$file"; done
       - name: Run backend unit tests
