@@ -12,6 +12,7 @@ model User {
   name               String?
   email              String    @unique
   passwordHash       String
+  role               String    @default("USER")
   plan               String    @default("FREE")
   subscriptionStatus String    @default("INACTIVE")
   billingCustomerId  String?
@@ -22,7 +23,22 @@ model User {
   deliveries         Delivery[]
   routes             Route[]
 
+  @@index([role])
   @@index([plan, subscriptionStatus])
+}
+
+model PlanConfig {
+  id             String   @id
+  name           String
+  priceCents     Int      @default(0)
+  routesPerMonth Int?
+  stopsPerRoute  Int?
+  historyDays    Int?
+  drivers        Int?
+  active         Boolean  @default(true)
+  featured       Boolean  @default(false)
+  description    String?
+  updatedAt      DateTime @updatedAt
 }
 
 model Address {
