@@ -1,6 +1,6 @@
 # RouteFlow — Development State
 
-Updated: 2026-09-07 22:55 BRT
+Updated: 2026-09-07 23:12 BRT
 Target: RouteFlow 1.0 Commercial Beta
 Branch: `main`
 
@@ -21,18 +21,19 @@ Deliver a mobile-first routing SaaS that turns delivery spreadsheets into an opt
 - Provider-neutral subscription event normalization and authenticated billing webhook boundary; live provider remains disabled without credentials.
 - API throttling, stricter auth throttling, payload limits and database readiness endpoint.
 - Address/coordinate validation before routing.
-- Operational route/delivery metrics module, reporting data service and frontend reporting component are implemented; final HTTP/UI wiring remains.
-- PWA shell cache hardened: HTML fallback is navigation-only, failed asset requests no longer receive index.html, cache version advanced.
+- Functional account reporting dashboard in History: 30-day deliveries, success rate, failed deliveries, completed/active routes and planned kilometers. It derives from authenticated production delivery/route endpoints, avoiding a release dependency on a not-yet-mounted reporting endpoint.
+- Backend operational metrics/reporting modules and unit tests remain available for future server-side aggregation.
+- PWA shell cache hardened: navigation-only HTML fallback, complete package-proof/reporting module cache and dedicated reporting stylesheet.
 - Production operations runbook covers health/readiness, backup, restore drill, incidents, secrets and release gate.
 - Recurring SaaS business plan, technical Terms and LGPD Privacy drafts.
 - Commercial readiness CI validates Prisma, every backend/frontend JS module, unit tests, PWA and release artifacts.
 
 ## Current engineering priorities
-1. Complete reporting HTTP endpoint and mount reporting UI in the History area.
-2. Private Proof photo storage adapter and confirmed upload state; external credentials required for live persistence.
-3. Complete provider-specific checkout/customer creation when billing provider credentials exist.
-4. Security/operations: structured request logging, monitoring hooks and dependency audit remediation.
-5. Automated API smoke tests, remaining PWA dependency hardening and final release checklist.
+1. Private Proof photo storage adapter and confirmed upload state; external credentials required for live persistence.
+2. Complete provider-specific checkout/customer creation when billing provider credentials exist.
+3. Security/operations: structured request logging, monitoring hooks and dependency audit remediation.
+4. Automated API smoke tests and final release checklist.
+5. Production routing SLA/provider, then physical mobile route validation.
 
 ## External blockers before public paid launch
 - Persistent private object storage credentials/provider for delivery photos.
