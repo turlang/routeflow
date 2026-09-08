@@ -2,7 +2,7 @@ import{z}from'zod';import{applyManagedPlans}from'./entitlements.js';
 const PLAN_IDS=['FREE','DRIVER','PRO','TEAM','BUSINESS'],STATUSES=['INACTIVE','TRIALING','ACTIVE','PAST_DUE','CANCELLED'];
 export const configuredAdminEmails=()=>new Set(String(process.env.ADMIN_EMAILS||'').split(',').map(v=>v.trim().toLowerCase()).filter(Boolean));
 export const roleForLogin=user=>user.role==='ADMIN'||configuredAdminEmails().has(String(user.email).toLowerCase())?'ADMIN':'USER';
-export function adminOnly(req,res,next){if(req.auth?.role!=='ADMIN')return res.status(403).json({error:'Acesso administrativo necessário'});next()}
+export function adminOnly(req,res,next){const configured=configuredAdminEmails().has(String(req.auth?.email||'').toLowerCase());if(req.auth?.role!=='ADMIN'&&!configured)return res.status(403).json({error:'Acesso administrativo necessário'});if(configured)req.auth.role='ADMIN';next()}
 const planInput=z.object({name:z.string().min(2).max(60).optional(),priceCents:z.number().int().min(0).max(100000000).optional(),routesPerMonth:z.number().int().positive().max(1000000).nullable().optional(),stopsPerRoute:z.number().int().positive().max(10000).nullable().optional(),historyDays:z.number().int().positive().max(36500).nullable().optional(),drivers:z.number().int().positive().max(100000).nullable().optional(),active:z.boolean().optional(),featured:z.boolean().optional(),description:z.string().max(500).nullable().optional()});
 const userInput=z.object({plan:z.enum(PLAN_IDS).optional(),subscriptionStatus:z.enum(STATUSES).optional(),role:z.enum(['USER','ADMIN']).optional(),billingPeriodEnd:z.string().datetime().nullable().optional()});
 export function mountAdminRoutes(app,{db,auth,routingConfigured,billingConfigured}){
