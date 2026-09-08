@@ -2,9 +2,11 @@ export function normalizeStreet(value='') {
   return String(value).split(',')[0].normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
     .replace(/^(r\.?|rua|av\.?|avenida|trav\.?|travessa|al\.?|alameda|estr\.?|estrada|rod\.?|rodovia)\s+/,'').replace(/\s+/g,' ').trim();
 }
+export function coordinateIssue(row){const lat=Number(row?.Latitude),lon=Number(row?.Longitude),address=String(row?.['Destination Address']||'').trim();if(!Number.isFinite(lat)||!Number.isFinite(lon))return'Coordenadas ausentes ou inválidas';if(lat<-90||lat>90||lon<-180||lon>180)return'Coordenadas fora dos limites geográficos';if(Math.abs(lat)<0.00001&&Math.abs(lon)<0.00001)return'Coordenadas apontam para 0,0';if(!address)return'Endereço de destino ausente';return''}
+export function validateDeliveryRows(rows=[]){const issues=[];rows.forEach((row,index)=>{const issue=coordinateIssue(row);if(issue)issues.push({index,row: index+2,address:String(row?.['Destination Address']||''),issue})});return{valid:issues.length===0,issues,total:rows.length,validRows:rows.length-issues.length}}
 export function groupStops(rows) {
   const map=new Map();
-  rows.forEach((row,index)=>{const lat=Number(row.Latitude),lon=Number(row.Longitude);if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
+  rows.forEach((row,index)=>{if(coordinateIssue(row))return;const lat=Number(row.Latitude),lon=Number(row.Longitude);
     const key=`${lat.toFixed(5)}|${lon.toFixed(5)}`;
     if(!map.has(key)) map.set(key,{key,lat,lon,street:normalizeStreet(row['Destination Address']),address:row['Destination Address']||'',neighborhood:row.Bairro||'',city:row.City||'',zipcode:row['Zipcode/Postal code']||'',rows:[],firstIndex:index});
     map.get(key).rows.push({...row,__sourceIndex:index});
