@@ -1,0 +1,21 @@
+name: RouteFlow Production Smoke
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 */6 * * *'
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Health
+        run: curl --fail --silent --show-error --retry 3 --retry-delay 5 --max-time 30 https://routeflow-api-tz5q.onrender.com/health | tee /tmp/health.json
+      - name: Readiness
+        run: curl --fail --silent --show-error --retry 3 --retry-delay 5 --max-time 30 https://routeflow-api-tz5q.onrender.com/ready | tee /tmp/ready.json
+      - name: Routing status
+        run: curl --fail --silent --show-error --retry 3 --retry-delay 5 --max-time 30 https://routeflow-api-tz5q.onrender.com/v1/routing/status | tee /tmp/routing.json
+      - name: Assert contracts
+        run: |
+          node -e "const f=require('fs');const h=JSON.parse(f.readFileSync('/tmp/health.json'));const r=JSON.parse(f.readFileSync('/tmp/ready.json'));const rt=JSON.parse(f.readFileSync('/tmp/routing.json'));if(!h.ok)throw Error('health failed');if(!r.ok||!r.database)throw Error('readiness failed');if(!rt.ok)throw Error('routing status failed');console.log({health:h.ok,database:r.database,routingConfigured:rt.configured,billingConfigured:r.billingConfigured})"
