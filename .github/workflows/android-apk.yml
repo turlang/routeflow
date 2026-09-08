@@ -1,0 +1,50 @@
+name: Build RouteFlow Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/android-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: android/package-lock.json
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Install Android dependencies
+        run: npm install --no-audit --no-fund
+      - name: Create native Android project
+        run: npx cap add android
+      - name: Sync Capacitor
+        run: npx cap sync android
+      - name: Build debug APK
+        run: cd android && ./gradlew assembleDebug
+      - name: Stage APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk ../RouteFlow.apk
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: RouteFlow-Android
+          path: android/RouteFlow.apk
+          if-no-files-found: error
+          retention-days: 30
