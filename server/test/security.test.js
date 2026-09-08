@@ -1,0 +1,4 @@
+import test from'node:test';import assert from'node:assert/strict';import{rateLimit,cleanupRateLimits}from'../src/security.js';
+function response(){return{statusCode:200,headers:{},body:null,setHeader(k,v){this.headers[k]=v},status(code){this.statusCode=code;return this},json(body){this.body=body;return this}}}
+test('rate limiter permits quota then returns 429',()=>{const limit=rateLimit({windowMs:60000,max:2,keyPrefix:`test-${Date.now()}`}),req={ip:'203.0.113.10'},r1=response(),r2=response(),r3=response();let calls=0;limit(req,r1,()=>calls++);limit(req,r2,()=>calls++);limit(req,r3,()=>calls++);assert.equal(calls,2);assert.equal(r3.statusCode,429);assert.ok(Number(r3.headers['Retry-After'])>0)});
+test('cleanup is safe with arbitrary timestamp',()=>assert.doesNotThrow(()=>cleanupRateLimits(Date.now()+86400000)));
