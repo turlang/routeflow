@@ -8,109 +8,141 @@ datasource db {
 }
 
 model User {
-  id                 String    @id @default(cuid())
-  name               String?
-  email              String    @unique
-  passwordHash       String
-  role               String    @default("USER")
-  plan               String    @default("FREE")
-  subscriptionStatus String    @default("INACTIVE")
-  billingCustomerId  String?
-  billingPeriodEnd   DateTime?
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  addresses          Address[]
-  deliveries         Delivery[]
-  routes             Route[]
-
+  id String @id @default(cuid())
+  name String?
+  email String @unique
+  passwordHash String
+  role String @default("USER")
+  plan String @default("FREE")
+  subscriptionStatus String @default("INACTIVE")
+  billingCustomerId String?
+  billingPeriodEnd DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  addresses Address[]
+  deliveries Delivery[]
+  routes Route[]
+  billingCheckouts BillingCheckout[]
+  billingSubscriptions BillingSubscription[]
   @@index([role])
   @@index([plan, subscriptionStatus])
 }
 
 model PlanConfig {
-  id             String   @id
-  name           String
-  priceCents     Int      @default(0)
+  id String @id
+  name String
+  priceCents Int @default(0)
   routesPerMonth Int?
-  stopsPerRoute  Int?
-  historyDays    Int?
-  drivers        Int?
-  active         Boolean  @default(true)
-  featured       Boolean  @default(false)
-  description    String?
-  updatedAt      DateTime @updatedAt
+  stopsPerRoute Int?
+  historyDays Int?
+  drivers Int?
+  active Boolean @default(true)
+  featured Boolean @default(false)
+  description String?
+  updatedAt DateTime @updatedAt
+}
+
+model BillingCheckout {
+  id String @id @default(cuid())
+  providerId String @unique
+  userId String
+  plan String
+  status String @default("ACTIVE")
+  url String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@index([userId,createdAt])
+}
+
+model BillingSubscription {
+  id String @id @default(cuid())
+  providerId String @unique
+  userId String
+  plan String
+  status String @default("ACTIVE")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  @@index([userId,status])
+}
+
+model BillingEvent {
+  id String @id @default(cuid())
+  providerEventId String @unique
+  type String
+  payload Json
+  createdAt DateTime @default(now())
+  @@index([type,createdAt])
 }
 
 model Address {
-  id             String   @id @default(cuid())
-  userId         String
-  normalizedKey  String
-  address        String
-  latitude       Float?
-  longitude      Float?
-  type           String   @default("Casa")
-  hours          String?
-  access         String?
-  parking        String?
-  notes          String?
-  importCount    Int      @default(1)
+  id String @id @default(cuid())
+  userId String
+  normalizedKey String
+  address String
+  latitude Float?
+  longitude Float?
+  type String @default("Casa")
+  hours String?
+  access String?
+  parking String?
+  notes String?
+  importCount Int @default(1)
   lastImportedAt DateTime @default(now())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deliveries     Delivery[]
-
-  @@unique([userId, normalizedKey])
-  @@index([userId, updatedAt])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  deliveries Delivery[]
+  @@unique([userId,normalizedKey])
+  @@index([userId,updatedAt])
 }
 
 model Route {
-  id              String     @id @default(cuid())
-  userId          String
-  clientId        String?
-  sourceFilename  String?
-  status          String     @default("PLANNED")
-  startedAt       DateTime?
-  finishedAt      DateTime?
-  plannedKm       Float?
-  plannedMinutes  Int?
-  stops           Int?
+  id String @id @default(cuid())
+  userId String
+  clientId String?
+  sourceFilename String?
+  status String @default("PLANNED")
+  startedAt DateTime?
+  finishedAt DateTime?
+  plannedKm Float?
+  plannedMinutes Int?
+  stops Int?
   deliveriesCount Int?
-  completedStops  Int        @default(0)
-  operational     Json?
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  user            User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  deliveries      Delivery[]
-
-  @@unique([userId, clientId])
-  @@index([userId, createdAt])
+  completedStops Int @default(0)
+  operational Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  deliveries Delivery[]
+  @@unique([userId,clientId])
+  @@index([userId,createdAt])
 }
 
 model Delivery {
-  id            String   @id @default(cuid())
-  userId        String
-  clientId      String?
-  routeId       String?
-  addressId     String?
-  packageNo     String?
-  size          String?
-  status        String   @default("PENDING")
-  deliveredAt   DateTime?
-  latitude      Float?
-  longitude     Float?
-  accuracy      Float?
-  notes         String?
+  id String @id @default(cuid())
+  userId String
+  clientId String?
+  routeId String?
+  addressId String?
+  packageNo String?
+  size String?
+  status String @default("PENDING")
+  deliveredAt DateTime?
+  latitude Float?
+  longitude Float?
+  accuracy Float?
+  notes String?
   failureReason String?
   recipientName String?
   proofPhotoUrl String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  route         Route?   @relation(fields: [routeId], references: [id], onDelete: SetNull)
-  address       Address? @relation(fields: [addressId], references: [id], onDelete: SetNull)
-
-  @@unique([userId, clientId])
-  @@index([userId, deliveredAt])
-  @@index([routeId, status])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user User @relation(fields:[userId],references:[id],onDelete:Cascade)
+  route Route? @relation(fields:[routeId],references:[id],onDelete:SetNull)
+  address Address? @relation(fields:[addressId],references:[id],onDelete:SetNull)
+  @@unique([userId,clientId])
+  @@index([userId,deliveredAt])
+  @@index([routeId,status])
 }
