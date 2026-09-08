@@ -1,0 +1,13 @@
+{
+  "appId": "com.routeflow.app",
+  "appName": "RouteFlow",
+  "webDir": "www",
+  "server": {
+    "url": "https://turlang.github.io/routeflow/",
+    "cleartext": false,
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
