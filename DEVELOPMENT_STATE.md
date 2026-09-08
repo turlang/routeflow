@@ -1,6 +1,6 @@
 # RouteFlow — Development State
 
-Updated: 2026-09-07 20:16 BRT
+Updated: 2026-09-07 21:30 BRT
 Target: RouteFlow 1.0 Commercial Beta
 Branch: `main`
 
@@ -8,47 +8,35 @@ Branch: `main`
 Deliver a mobile-first routing SaaS that turns delivery spreadsheets into an optimized, executable route with navigation, proof of delivery, cloud persistence and recurring commercial plans. Development continues without stopping at micro-gates. Human input is required only for external credentials/contracts or physical field validation.
 
 ## Completed core
-- Excel import preserving source columns.
-- Physical-stop grouping for multiple packages at the same coordinates.
-- Directed road-network matrix and route optimization.
-- Manual stop ordering and recalculation.
-- Distance, service-time and ETA estimates.
-- Internal RouteFlow navigator with numbered stops and GPS.
-- Route position separated from original package number.
-- Current-location start option and WhatsApp contact action.
-- Address registry with place type and operational metadata.
-- Authentication and PostgreSQL backend.
-- Active-route persistence, cross-device reconciliation and automatic resume.
-- Route and delivery history.
-- Proof of Delivery model and migration.
-- Proof UI with delivered/failed, recipient, failure reason, notes, GPS and optional photo selection.
-- One terminal Delivery record per spreadsheet package.
-- Stable/idempotent delivery client IDs per route/package.
-- Backend Proof of Delivery upsert/update semantics.
-- Offline delivery outbox with automatic retry after connectivity returns.
-- SaaS entitlement fields and production migration.
-- Recurring SaaS business plan.
+- Excel import preserving source columns and physical-stop grouping.
+- Directed road-network optimization, manual ordering, route stats and internal GPS navigator.
+- Address registry, authentication, PostgreSQL backend, route history and cross-device active-route resume.
+- Proof of Delivery model, migration and idempotent cloud upsert.
+- One terminal Delivery record per spreadsheet package with stable client IDs.
+- Per-package Proof editor for multi-package physical stops, including independent delivered/failed outcome, recipient and mandatory failure reason.
+- Offline delivery outbox and automatic retry.
+- SaaS plans/entitlements with server-side monthly route and stop limits.
+- API throttling, stricter auth throttling, payload limits and database readiness endpoint.
+- Address/coordinate validation before routing.
+- Provider-configurable routing gateway with timeout and explicit development fallback.
 - Installable PWA shell and same-origin offline cache.
-- Commercial readiness CI workflow including Prisma, JS, PWA and release-artifact validation.
-- Technical Terms of Use and LGPD Privacy Policy drafts, explicitly pending legal/entity completion.
-- Environment contract for production routing, private object storage and recurring billing adapters.
+- Recurring SaaS business plan, technical Terms and LGPD Privacy drafts.
+- Commercial readiness CI validates Prisma, every backend/frontend JS module, unit tests, PWA and release artifacts.
 
 ## Current engineering priorities
-1. Per-package Proof UI for mixed outcomes when multiple packages share one physical stop.
-2. Private photo-storage adapter and confirmed upload state; external storage credentials remain required for live persistence.
-3. Production routing adapter/proxy, timeout/retry and provider health; external provider/instance remains required for production SLA.
-4. Address-quality validation and suspicious-coordinate handling.
-5. Server-side SaaS usage limits/entitlements and provider-neutral billing webhook boundary.
-6. Security/operations hardening: auth throttling, request limits, readiness and observability hooks.
-7. Route/delivery reporting and commercial metrics.
-8. Automated smoke tests and release checklist.
+1. Wire frontend routing calls through the backend production gateway while retaining explicit development fallback.
+2. Private Proof photo storage adapter and confirmed upload state; external credentials required for live persistence.
+3. Provider-neutral billing webhook boundary and subscription lifecycle enforcement.
+4. Route/delivery reporting and commercial metrics.
+5. Security/operations: structured request logging, monitoring hooks, backup/restore runbook and dependency audit remediation.
+6. Automated API smoke tests and final release checklist.
 
 ## External blockers before public paid launch
 - Persistent private object storage credentials/provider for delivery photos.
 - Production routing provider or hosted routing infrastructure.
 - Recurring payment provider account/credentials.
 - Production-grade database/API resources, backup/restore and monitoring configuration.
-- Final Terms of Use / Privacy Policy review and real controller/company data.
+- Final Terms/Privacy legal review and real controller/company data.
 - Physical Android/iPhone field validation and at least one real end-to-end route.
 
 ## Continuity rule
