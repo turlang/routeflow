@@ -24,6 +24,9 @@ const addMonth = (date) => {
   return next;
 };
 
+const makeExternalReference = (plan) =>
+  `routeflow_${plan}_${crypto.randomUUID()}`.slice(0, 64);
+
 const safeMpErrorDetails = (details) => {
   if (!details || typeof details !== 'object') return undefined;
 
@@ -235,7 +238,7 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
       const chargeAmountCents = isProduction()
         ? listPriceCents
         : TEST_PIX_AMOUNT_CENTS;
-      const reference = `routeflow:${req.auth.sub}:${plan}:MERCADOPAGO_PIX`;
+      const reference = makeExternalReference(plan);
       const idempotencyKey = crypto.randomUUID();
       const value = (chargeAmountCents / 100).toFixed(2);
 
