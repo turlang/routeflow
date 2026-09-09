@@ -7,6 +7,10 @@ import { paymentPrices } from './payment-pricing.js';
 
 const PLANS = new Set(['DRIVER', 'PRO', 'TEAM', 'BUSINESS']);
 const API = 'https://api.mercadopago.com';
+const TEST_PIX_AMOUNT_CENTS = 5_000;
+
+const isProduction = () =>
+  process.env.MERCADOPAGO_ENVIRONMENT === 'production';
 
 export const mercadoPagoConfigured = () =>
   Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN);
@@ -18,6 +22,23 @@ const addMonth = (date) => {
   const next = new Date(date);
   next.setUTCMonth(next.getUTCMonth() + 1);
   return next;
+};
+
+const safeMpErrorDetails = (details) => {
+  if (!details || typeof details !== 'object') return undefined;
+
+  const errors = Array.isArray(details.errors)
+    ? details.errors.slice(0, 5).map((entry) => ({
+        code: entry?.code || entry?.error || null,
+        message: entry?.message || null,
+        property: entry?.property || null,
+      }))
+    : undefined;
+
+  return {
+    code: details.code || details.error || null,
+    errors,
+  };
 };
 
 async function mp(path, { method = 'GET', body, idempotencyKey } = {}) {
@@ -176,10 +197,7 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
       webhookConfigured: mercadoPagoWebhookConfigured(),
       provider: 'mercadopago',
       methods: ['PIX'],
-      environment:
-        process.env.MERCADOPAGO_ENVIRONMENT === 'production'
-          ? 'production'
-          : 'test',
+      environment: isProduction() ? 'production' : 'test',
     }),
   );
 
@@ -213,33 +231,55 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
           .json({ error: 'Conta sem e-mail para pagamento' });
       }
 
-      const amount = paymentPrices(base).pixCents;
+      const listPriceCents = paymentPrices(base).pixCents;
+      const chargeAmountCents = isProduction()
+        ? listPriceCents
+        : TEST_PIX_AMOUNT_CENTS;
       const reference = `routeflow:${req.auth.sub}:${plan}:MERCADOPAGO_PIX`;
       const idempotencyKey = crypto.randomUUID();
-      const value = (amount / 100).toFixed(2);
+      const value = (chargeAmountCents / 100).toFixed(2);
+
+      const productionPayment = {
+        amount: value,
+        payment_method: {
+          id: 'pix',
+          type: 'bank_transfer',
+        },
+        expiration_time: 'PT1H',
+      };
+
+      const testPayment = {
+        amount: value,
+        payment_method: {
+          id: 'pix',
+          type: 'bank_transfer',
+        },
+      };
+
+      const orderBody = isProduction()
+        ? {
+            type: 'online',
+            total_amount: value,
+            external_reference: reference,
+            processing_mode: 'automatic',
+            transactions: { payments: [productionPayment] },
+            payer: { email: user.email },
+          }
+        : {
+            type: 'online',
+            external_reference: reference,
+            total_amount: value,
+            payer: {
+              email: 'test_user_br@testuser.com',
+              first_name: 'APRO',
+            },
+            transactions: { payments: [testPayment] },
+          };
 
       const order = await mp('/v1/orders', {
         method: 'POST',
         idempotencyKey,
-        body: {
-          type: 'online',
-          total_amount: value,
-          external_reference: reference,
-          processing_mode: 'automatic',
-          transactions: {
-            payments: [
-              {
-                amount: value,
-                payment_method: {
-                  id: 'pix',
-                  type: 'bank_transfer',
-                },
-                expiration_time: 'PT1H',
-              },
-            ],
-          },
-          payer: { email: user.email },
-        },
+        body: orderBody,
       });
 
       if (!order?.id) {
@@ -266,25 +306,25 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
         provider: 'mercadopago',
         orderId: order.id,
         plan,
-        amountCents: amount,
+        amountCents: chargeAmountCents,
+        listPriceCents,
+        testPurchase: !isProduction(),
         pixCopiaECola: method.qr_code || null,
         qrCodeBase64: method.qr_code_base64 || null,
         ticketUrl: url,
         status: order.status,
         statusDetail: order.status_detail,
-        expiresInSeconds: 3600,
-        environment:
-          process.env.MERCADOPAGO_ENVIRONMENT === 'production'
-            ? 'production'
-            : 'test',
+        expiresInSeconds: isProduction() ? 3600 : 86400,
+        environment: isProduction() ? 'production' : 'test',
       });
     } catch (error) {
-      console.error(
+      console.warn(
         JSON.stringify({
           level: 'warn',
           type: 'mercadopago_pix_rejected',
           status: error.status || 502,
           message: error.message,
+          details: safeMpErrorDetails(error.details),
         }),
       );
       res
