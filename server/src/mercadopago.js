@@ -4,6 +4,11 @@ import {
   WebhookSignatureValidator,
 } from 'mercadopago';
 import { paymentPrices } from './payment-pricing.js';
+import {
+  isMercadoPagoTestOrderId,
+  mayVerifyUnsignedMercadoPagoTestOrder,
+  mercadoPagoWebhookSecrets,
+} from './mercadopago-webhook-policy.js';
 
 const PLANS = new Set(['DRIVER', 'PRO', 'TEAM', 'BUSINESS']);
 const API = 'https://api.mercadopago.com';
@@ -16,7 +21,7 @@ export const mercadoPagoConfigured = () =>
   Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN);
 
 export const mercadoPagoWebhookConfigured = () =>
-  Boolean(process.env.MERCADOPAGO_WEBHOOK_SECRET);
+  mercadoPagoWebhookSecrets().length > 0;
 
 const addMonth = (date) => {
   const next = new Date(date);
@@ -85,37 +90,42 @@ async function mp(path, { method = 'GET', body, idempotencyKey } = {}) {
 }
 
 function webhookValid(req) {
-  const secret = process.env.MERCADOPAGO_WEBHOOK_SECRET;
-  if (!secret) return false;
+  const secrets = mercadoPagoWebhookSecrets();
+  if (!secrets.length) return false;
 
   const xSignature = req.headers['x-signature'];
   const xRequestId = req.headers['x-request-id'];
   const queryDataId = req.query?.['data.id'];
+  let rejectionReason = 'invalid_signature';
 
-  try {
-    WebhookSignatureValidator.validate({
-      xSignature: xSignature == null ? undefined : String(xSignature),
-      xRequestId: xRequestId == null ? undefined : String(xRequestId),
-      dataId: queryDataId == null ? undefined : String(queryDataId),
-      secret,
-    });
-    return true;
-  } catch (error) {
-    console.warn(
-      JSON.stringify({
-        level: 'warn',
-        type: 'mercadopago_webhook_signature_rejected',
-        reason:
-          error instanceof InvalidWebhookSignatureError
-            ? 'invalid_signature'
-            : 'validator_error',
-        hasSignature: Boolean(xSignature),
-        hasRequestId: Boolean(xRequestId),
-        hasDataId: Boolean(queryDataId),
-      }),
-    );
-    return false;
+  for (const secret of secrets) {
+    try {
+      WebhookSignatureValidator.validate({
+        xSignature: xSignature == null ? undefined : String(xSignature),
+        xRequestId: xRequestId == null ? undefined : String(xRequestId),
+        dataId: queryDataId == null ? undefined : String(queryDataId),
+        secret,
+      });
+      return true;
+    } catch (error) {
+      if (!(error instanceof InvalidWebhookSignatureError)) {
+        rejectionReason = 'validator_error';
+      }
+    }
   }
+
+  console.warn(
+    JSON.stringify({
+      level: 'warn',
+      type: 'mercadopago_webhook_signature_rejected',
+      reason: rejectionReason,
+      candidateSecrets: secrets.length,
+      hasSignature: Boolean(xSignature),
+      hasRequestId: Boolean(xRequestId),
+      hasDataId: Boolean(queryDataId),
+    }),
+  );
+  return false;
 }
 
 const paid = (order) =>
@@ -201,6 +211,11 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
       provider: 'mercadopago',
       methods: ['PIX'],
       environment: isProduction() ? 'production' : 'test',
+      dedicatedWebhookSecret: Boolean(
+        isProduction()
+          ? process.env.MERCADOPAGO_WEBHOOK_SECRET_PRODUCTION
+          : process.env.MERCADOPAGO_WEBHOOK_SECRET_TEST,
+      ),
     }),
   );
 
@@ -368,22 +383,53 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
         .json({ error: 'Webhook Mercado Pago não configurado' });
     }
 
-    if (!webhookValid(req)) {
-      return res
-        .status(401)
-        .json({ error: 'Webhook Mercado Pago não autorizado' });
-    }
-
     const orderId = String(
       req.query?.['data.id'] || req.body?.data?.id || '',
     );
+    const type = String(req.query?.type || req.body?.type || '').toLowerCase();
+    const signatureValid = webhookValid(req);
+    let verifiedTestFallback = false;
+
+    if (!signatureValid) {
+      let checkoutKnown = false;
+      if (!isProduction() && isMercadoPagoTestOrderId(orderId)) {
+        checkoutKnown = Boolean(
+          await db.billingCheckout.findUnique({
+            where: { providerId: orderId },
+            select: { providerId: true },
+          }),
+        );
+      }
+
+      verifiedTestFallback = mayVerifyUnsignedMercadoPagoTestOrder({
+        signatureValid,
+        orderId,
+        eventType: type,
+        checkoutKnown,
+      });
+
+      if (!verifiedTestFallback) {
+        return res
+          .status(401)
+          .json({ error: 'Webhook Mercado Pago não autorizado' });
+      }
+
+      console.warn(
+        JSON.stringify({
+          level: 'warn',
+          type: 'mercadopago_test_webhook_authoritative_fallback',
+          orderId,
+          reason: 'signature_mismatch_in_test_environment',
+        }),
+      );
+    }
+
     if (!orderId) {
       return res
         .status(200)
         .json({ ok: true, ignored: true, reason: 'missing_order_id' });
     }
 
-    const type = String(req.query?.type || req.body?.type || '').toLowerCase();
     if (type && type !== 'order') {
       return res
         .status(200)
@@ -400,12 +446,20 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
           where: { providerEventId: eventId },
         })
       ) {
-        return res.json({ ok: true, duplicate: true });
+        return res.json({
+          ok: true,
+          duplicate: true,
+          verification: verifiedTestFallback ? 'authoritative_test_order' : 'signature',
+        });
       }
 
       const order = await mp(`/v1/orders/${encodeURIComponent(orderId)}`);
       const result = await reconcile(db, order, eventId);
-      res.json({ ok: true, ...result });
+      res.json({
+        ok: true,
+        verification: verifiedTestFallback ? 'authoritative_test_order' : 'signature',
+        ...result,
+      });
     } catch (error) {
       const invalidSimulatorOrderId =
         error.status === 400 &&
@@ -427,6 +481,7 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
           level: 'error',
           type: 'mercadopago_webhook',
           orderId,
+          verification: verifiedTestFallback ? 'authoritative_test_order' : 'signature',
           message: error.message,
         }),
       );
