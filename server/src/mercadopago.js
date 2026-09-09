@@ -364,12 +364,18 @@ export function mountMercadoPagoRoutes(app, { db, auth, planPrice }) {
       const result = await reconcile(db, order, eventId);
       res.json({ ok: true, ...result });
     } catch (error) {
-      if (error.status === 404) {
+      const invalidSimulatorOrderId =
+        error.status === 400 &&
+        /path param order id is invalid/i.test(String(error.message || ''));
+
+      if (error.status === 404 || invalidSimulatorOrderId) {
         return res.status(200).json({
           ok: true,
           verified: true,
           ignored: true,
-          reason: 'order_not_found',
+          reason: invalidSimulatorOrderId
+            ? 'invalid_simulator_order_id'
+            : 'order_not_found',
         });
       }
 
