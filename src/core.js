@@ -1,3 +1,4 @@
+import './precision-route-control.js';
 import './smart-route-control.js';
 export function normalizeStreet(value='') {
   return String(value).split(',')[0].normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
