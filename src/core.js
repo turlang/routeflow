@@ -1,4 +1,4 @@
-import './smart-route-control.js';
+if(typeof window!=='undefined'&&typeof document!=='undefined')import('./smart-route-control.js');
 export function normalizeStreet(value='') {
   return String(value).split(',')[0].normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()
     .replace(/^(r\.?|rua|av\.?|avenida|trav\.?|travessa|al\.?|alameda|estr\.?|estrada|rod\.?|rodovia)\s+/,'').replace(/\s+/g,' ').trim();
