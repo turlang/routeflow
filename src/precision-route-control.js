@@ -7,7 +7,27 @@ function parseStops(rows){const map=new Map();for(const row of rows){const lat=N
 async function readExcel(file){try{const wb=XLSX.read(await file.arrayBuffer(),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws,{defval:''});STATE.stops=parseStops(rows)}catch{STATE.stops=[]}}
 function rememberOrigin(){if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(p=>{STATE.origin={lat:p.coords.latitude,lon:p.coords.longitude,accuracy:p.coords.accuracy,at:Date.now()};window.__routeflowRoadOrigin=STATE.origin},{enableHighAccuracy:true,timeout:12000,maximumAge:3000})}
 function greedyCost(start,matrix){const left=new Set(matrix.map((_,i)=>i));left.delete(start);let cur=start,cost=0;while(left.size){let next=-1,best=Infinity;for(const i of left){const d=Number(matrix[cur]?.[i]);if(Number.isFinite(d)&&d<best){best=d;next=i}}if(next<0)return Infinity;cost+=best;cur=next;left.delete(next)}return cost}
-function bestRoadStart(full){const distances=full?.distances;if(!STATE.origin||!Array.isArray(distances)||distances.length!==STATE.stops.length+1)return null;const matrix=distances.slice(1).map(row=>row.slice(1)),originCosts=distances[0].slice(1);const candidates=originCosts.map((cost,i)=>({i,cost:Number(cost)})).filter(x=>Number.isFinite(x.cost)).sort((a,b)=>a.cost-b.cost).slice(0,Math.min(12,STATE.stops.length));let best=null;for(const c of candidates){const total=c.cost+greedyCost(c.i,matrix);if(!best||total<best.total)best={i:c.i,total,origin:c.cost}}return best}
+function bestRoadStart(full){
+  const distances=Array.isArray(full?.distances)?full.distances:null;
+  const durations=Array.isArray(full?.durations)?full.durations:null;
+  const costs=durations?.length===STATE.stops.length+1?durations:distances;
+  if(!STATE.origin||!Array.isArray(costs)||costs.length!==STATE.stops.length+1)return null;
+  const originCosts=costs[0]?.slice(1)||[];
+  const originDistances=distances?.[0]?.slice(1)||[];
+  let bestIndex=-1,bestCost=Infinity,bestDistance=Infinity;
+  for(let i=0;i<originCosts.length;i++){
+    const cost=Number(originCosts[i]);
+    if(!Number.isFinite(cost))continue;
+    const roadDistance=Number(originDistances[i]);
+    const distance=Number.isFinite(roadDistance)?roadDistance:Infinity;
+    if(cost<bestCost-0.001||(Math.abs(cost-bestCost)<=0.001&&distance<bestDistance)){
+      bestIndex=i;
+      bestCost=cost;
+      bestDistance=distance;
+    }
+  }
+  return bestIndex>=0?{i:bestIndex,total:bestCost,origin:bestCost,metric:durations?'duration':'distance'}:null;
+}
 function stripOriginMatrix(data){const out={...data};if(Array.isArray(data.distances))out.distances=data.distances.slice(1).map(row=>row.slice(1));if(Array.isArray(data.durations))out.durations=data.durations.slice(1).map(row=>row.slice(1));if(Array.isArray(data.sources))out.sources=data.sources.slice(1);if(Array.isArray(data.destinations))out.destinations=data.destinations.slice(1);return out}
 function installRoadOrigin(){if(window.__routeflowPrecisionFetch)return;window.__routeflowPrecisionFetch=true;window.fetch=async(input,init={})=>{const url=typeof input==='string'?input:input?.url||'';if(!STATE.origin||!url.includes('/v1/routing/table')||String(init.method||'GET').toUpperCase()!=='POST')return rawFetch(input,init);let payload;try{payload=JSON.parse(init.body||'{}')}catch{return rawFetch(input,init)}const coords=payload?.coordinates;if(!Array.isArray(coords)||coords.length!==STATE.stops.length||!coords.length)return rawFetch(input,init);const augmented={...payload,coordinates:[{lat:STATE.origin.lat,lon:STATE.origin.lon},...coords]};const response=await rawFetch(input,{...init,body:JSON.stringify(augmented)});if(!response.ok)return response;const data=await response.clone().json();const choice=bestRoadStart(data);if(choice&&$('start'))$('start').value=String(choice.i);const body=JSON.stringify(stripOriginMatrix(data));return new Response(body,{status:response.status,statusText:response.statusText,headers:{'Content-Type':'application/json'}})} }
 function byAddress(){return new Map(STATE.stops.map(s=>[normalize(s.address),s]))}
