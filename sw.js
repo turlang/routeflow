@@ -1,4 +1,4 @@
-const CACHE='routeflow-shell-v10';
+const CACHE='routeflow-shell-v11';
 const SHELL=['./','./index.html','./manifest.webmanifest','./routeflow-icon.svg','./src/style.css','./src/proof.css','./src/reporting.css','./src/subscriber.css','./src/admin.css','./src/main.js','./src/core.js','./src/api.js','./src/auth-ui.js','./src/subscriber-ui.js','./src/admin-ui.js','./src/sync.js','./src/history-sync.js','./src/delivery-history-ui.js','./src/registry-ui.js','./src/mobile-ui.js','./src/route-history-ui.js','./src/route-session.js','./src/package-proof.js','./src/reporting-ui.js','./src/sync-status-ui.js','./src/precision-route-control.js','./src/smart-route-control.js'];
 self.addEventListener('install',event=>event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener('activate',event=>event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
