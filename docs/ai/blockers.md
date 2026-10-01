@@ -1,6 +1,6 @@
 # Bloqueios e pendências de validação
 
-Atualizado em: 2026-10-01T15:49:26Z
+Atualizado em: 2026-10-01T15:56:18Z
 
 Responsável: Codex/ECC
 
@@ -91,3 +91,11 @@ Responsável: Codex/ECC | Status: aberto para validação manual | Evidência: v
 Corrigida a preservação incondicional do cache diante de null remoto: ausência válida confirmada e sem pendências limpa rota ativa/UI; erro de rede, HTTP ou JSON mantém cache. Edição/nova rota durante consulta e troca de conta são protegidas. Estado terminal conflitante fecha retomada e preserva snapshot offline na fila bloqueada. Regressões passaram nos dois sistemas/versões Node, incluindo UI com doubles.
 
 O risco de código registrado no adendo anterior foi tratado, sem afirmar aceite físico. Ainda validar duas sessões/dispositivos reais, abrir/fechar/reconectar, encerramento remoto com e sem fila e revisão visível do conflito. BLK-001, BLK-002, BLK-003 e BLK-005 mantêm pendências anteriores. Não houve produção/deploy.
+
+## BLK-006 — Achados high na auditoria de dependências
+
+Data: 2026-10-01T15:56:18Z | Responsável: Codex/ECC | Status: aberto.
+
+Evidência: relatório npm audit do [run remoto 36887757820](https://github.com/turlang/routeflow/actions/runs/36887757820), 3 achados high em deepmerge-ts, @prisma/config e prisma ([GHSA-ggr8-5vv4-36mx](https://github.com/advisories/GHSA-ggr8-5vv4-36mx)). Critério crítico existente preservado: auditoria retornou success. O relatório sugere alteração incompatível via --force; nenhuma atualização automática foi aplicada.
+
+Desbloqueio: avaliar exposição e uma atualização compatível do conjunto Prisma em tarefa própria, testar geração/migrações/API e repetir audit. Não confundir check aprovado no limiar critical com ausência de achados high. Fora da correção de retomada; sem alteração de produção.

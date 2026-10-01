@@ -75,4 +75,10 @@ test('real UI session handlers clear A workspace, maps and GPS on logout before 
   assert.equal(nodes.get('navigator').hidden,true);assert.equal(nodes.get('workspace').hidden,true);
   assert.equal(nodes.get('manualList').innerHTML,'');assert.equal(nodes.get('startRoute').disabled,true);
   assert.deepEqual(cleared,[0,0]);assert.equal(window.routeflowLastPosition,null);
+  writeData('activeRoute',{clientId:'ended-while-offline',serverId:'ended-while-offline',status:'ACTIVE',completedStops:0,stops:1,operational:{stops:[stop],order:[0],headers:['Destination Address']}});
+  window.dispatchEvent(new Event('routeflow:active-route-synced'));
+  assert.equal(nodes.get('workspace').hidden,false);
+  const reconciled=new Promise(resolve=>window.addEventListener('routeflow:active-route-cleared',resolve,{once:true}));
+  window.dispatchEvent(new Event('online'));await reconciled;
+  assert.equal(readData('activeRoute',null),null);assert.equal(nodes.get('workspace').hidden,true);
 });

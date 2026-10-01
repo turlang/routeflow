@@ -1,6 +1,6 @@
 # Progresso e evidências
 
-Atualizado em: 2026-10-01T15:49:26Z
+Atualizado em: 2026-10-01T15:56:18Z
 
 Responsável: Codex/ECC
 
@@ -111,3 +111,11 @@ Workflow commercial-readiness: pull_request para main, além de push main e work
 Validação real local: 40/40 testes Gate A e core tests OK em Windows/Node 24.16.0; mesmos 40/40 e núcleo em contêiner temporário Linux/Node 22.23.2. Build Vite aprovado. Backend 33/33 unitários; sintaxe de src, server/src e sw aprovada; diff --check sem erros. Falha inicial de duas regressões por espera do timer do lease corrigida usando sinal explícito de requisição iniciada. Nenhuma falha intermediária foi contada como aprovação.
 
 Não alterados backend/esquema/migrações; integração HTTP/PostgreSQL da PRG-004 permanece evidência histórica de sua execução, não foi reexecutada nesta tarefa. Novos testes e workflow não validam PWA/APK nem dois dispositivos físicos. Roteiro manual atualizado: comparar null confirmado com rede bloqueada e estado final com edição offline pendente. Gate A continua em_validacao, BLK-004 ainda exige reprodução física. Próximo passo: publicar e acompanhar checks remotos do PR; registrar resultado efetivo abaixo.
+
+### Check remoto confirmado — 2026-10-01T15:56:18Z
+
+Commit 59bc4a1dc88e35d16269966c35eaf1a4da77d21b publicado no PR #2. [Run 36887757820](https://github.com/turlang/routeflow/actions/runs/36887757820), evento pull_request: validate SUCCESS, concluído em 15:53:51Z. Passos Prisma validate/generate, sintaxe, 33/33 unitários backend, 40/40 Gate A e core OK, auditoria e artefatos todos success. Não houve job de deploy.
+
+Auditoria manteve o critério existente `--audit-level=critical` e passou, porém reportou 3 achados high na cadeia deepmerge-ts → @prisma/config → prisma. Registrado BLK-006, sem executar audit fix --force nem mudar dependências nesta correção. Check verde não significa ausência de vulnerabilidades altas.
+
+Conferência adicional: evento online também chama recoverActiveRoute para reconciliar cache após reconexão sem recarga. Teste de UI cobre essa reconciliação automática; novamente 40/40 e núcleo aprovados em Windows/Node 24 e Linux/Node 22, build aprovado. A alteração de reconexão segue em publicação na mesma branch; resultado remoto da nova revisão será confirmado antes da entrega.

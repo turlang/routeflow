@@ -54,6 +54,7 @@ function resetAccountWorkspace(){
  $('navSequence').textContent='Parada - de -';$('navDestination').textContent='-';$('navImportedSequence').textContent='N\u00b0 Pacote: -';$('routeSummary').textContent='Os pontos aparecer\u00e3o ap\u00f3s importar.';$('notice').textContent='Aguardando otimiza\u00e7\u00e3o.';resetStats();setStatus('Pronto');restoreOperational(resumableRoute());
 }
 window.addEventListener('routeflow:session-changed',resetAccountWorkspace);
+window.addEventListener('online',recoverActiveRoute);
 window.addEventListener('routeflow:active-route-cleared',event=>{if(event.detail?.clientId&&event.detail.clientId===displayedRouteClientId)resetAccountWorkspace()});
 window.addEventListener('routeflow:active-route-synced',()=>{if($('navigator').hidden)restoreOperational(resumableRoute())});
 initMap();initAuthUI();initDeliveryHistoryUI();initRegistryUI();initRouteHistoryUI();initMobileUI();resetStats();restoreOperational(resumableRoute());initRouteSync();recoverActiveRoute();
