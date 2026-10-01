@@ -1,12 +1,12 @@
 # Progresso e evidências
 
-Atualizado em: 2026-09-30T17:14:28Z
+Atualizado em: 2026-10-01T15:27:49Z
 
 Responsável: Codex/ECC
 
-Base inspecionada: `ddd1bb97f20783b93970aa57e3e2bfaefc0446f2` (`origin/main`)
+Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
-Status: concluida (preparação documental; integração em main pendente)
+Status: em_andamento (TASK-004 revisao/publicacao; Gate A em_validacao)
 
 ## PRG-001 — 2026-09-30T17:10:47Z — Codex/ECC
 
@@ -33,3 +33,57 @@ Acrescentar entradas PRG com timestamp, tarefa, SHA, ação, comando/cenário de
 Tarefa: TASK-001. Status: concluida (validação documental).
 
 Validados seis arquivos, timestamps e status, todos os links locais, ausência de marcadores de conflito e escopo exclusivo em docs/ai. git diff --cached --check aprovado após normalizar espaços de fim de linha. Nenhum teste funcional executado, pois esta alteração modifica somente documentação. Próxima ação: publicação da branch e PR; integração em main continua pendente.
+
+## PRG-003 — 2026-10-01T14:12:38Z — Codex/ECC
+
+Tarefa: TASK-003 — conciliar conflitos de git stash apply. Status: concluida localmente.
+
+Base: main, `077ac9fcbe17b3da3348242b2dd863877d47eee3`. A base já contém a ponte documental via PR #1; as notas anteriores de integração pendente são históricas. Nenhuma atualização remota, commit, push ou deploy nesta tarefa.
+
+ECC disponível nesta sessão: pacote 2.2.2 e skill git-workflow lida. README e os cinco arquivos da ponte foram lidos antes da resolução. Os estágios 2 (main) e 3 (stash), a base comum e os trechos sem conflito foram considerados; nenhuma seleção integral de ours/theirs foi usada como resultado final.
+
+Conciliação dos nove arquivos:
+
+| Arquivo | Resultado |
+| --- | --- |
+| server/package.json | Scripts check/db:validate, engines e Mercado Pago da main, mais test:integration local. |
+| server/src/server.js | Administração, billing, roles, segurança, observabilidade, gateway, validações e comprovantes da main; criação/atualização de rotas por route-service, estado final offline e exportação para testes. Quotas verificadas sob o mesmo bloqueio de usuário, após deduplicação. |
+| src/api.js | Sessão e requisições com escopo local; todos os exports de gateway, relatórios, administração e billing preservados. Default da API publicada preservado em storage. |
+| src/auth-ui.js | Área do assinante/admin da main com migração, filas, mensagens e verificações de sessão do Gate A. |
+| src/delivery-history-ui.js | Comprovantes por pacote e IDs estáveis da main em storage por conta, com atualização da UI no logout. |
+| src/history-sync.js | Fila offline e campos FAILED/recebedor/motivo/foto da main com escopo por conta e descarte de respostas antigas; flush preserva novas entradas pendentes. |
+| src/main.js | Gateway, importação que preserva a rota ativa, snapshots e comprovantes da main; proteção de continuações/GPS e limpeza da sessão local. Início adaptado ao contrato de beginRoute; progresso final e recebedor corrigidos na ligação entre os módulos. |
+| src/route-history-ui.js | Histórico com snapshot, deduplicação por clientId/serverId e proteção de rotas pendentes do Gate A. |
+| src/route-session.js | Outbox durável, cancelamento, retry e escopo do Gate A; atualização de snapshot ao avançar. |
+
+Preservados os arquivos novos route-service, storage, legacy-migration, route-sync, tests/ e server/tests/, além de registry-ui, sync, package.json e server/README.md já modificados sem conflito. Acrescentado stash-reconciliation.test.mjs. O teste de UI foi adaptado aos controles atuais e verifica comprovante FAILED, recebedor, GPS e progresso final antes da troca de conta. O teste antigo do núcleo recebeu coordenadas sintéticas válidas, pois a main rejeita 0,0. precision-route-control recebeu apenas uma guarda para importação em Node; algoritmo de otimização em core.js preservado. .gitignore exclui dependências e artefatos locais gerados na validação.
+
+Evidência validado_por_teste em 01/10:
+
+- `npm.cmd test`: 29/29 testes Node e `core tests: OK`.
+- `npm.cmd run build`: Vite aprovado, 29 módulos.
+- `node --test server/test/*.test.js`: 33/33 aprovados no host Node 24.16.0.
+- Integração e unitários em contêiner temporário Node 22.23.2/PostgreSQL 17: 34/34 aprovados (33 unitários + 1 teste integrado com múltiplos cenários). Código e testes atuais montados para leitura; dependências atuais instaladas e Prisma 6.19.3 gerado somente no contêiner temporário.
+- Banco exclusivo preexistente `routeflow_gate_a_test`: aplicadas quatro migrações existentes que faltavam, totalizando seis; reexecução sem migrações pendentes. Nenhum banco normal ou serviço principal atualizado. Usuários sintéticos removidos pelo finally do teste.
+- Integração: 12 criações simultâneas da mesma identidade geram uma rota; retry retorna 200; contas diferentes permanecem separadas; progresso não regride; rota concluída não reabre; quota FREE concorrente aceita duas de quatro rotas e rejeita as demais; replay continua permitido na quota; limite de 25 paradas preservado.
+- CORS local: OPTIONS permitido retorna 204 com origem autorizada; origem rejeitada não recebe allow-origin e mantém o comportamento atual 500 da main. Isso não comprova CORS implantado/APK.
+
+Falhas intermediárias corrigidas: importação de window no teste Node, mocks antigos da UI, dados 0,0 e composição inicial de exports. Dependências ausentes e acesso npm bloqueado pelo sandbox foram resolvidos com instalação autorizada. A imagem Docker antiga tinha somente duas migrações e não incluía Mercado Pago; a validação final utilizou esquema/dependências atuais. Nenhuma falha desses ensaios foi contabilizada como aprovação.
+
+Stash preservado: `stash@{0}`, SHA `8733be6d1b05cbf2058ee1248d505d9e61121ef8`, “Trabalho local antes de atualizar main”. Checagem final: índice sem entradas não conciliadas, ausência de marcadores no código/docs/testes e diff --check sem erros. Alterações permanecem locais e preparadas no índice para revisão, sem commit.
+
+Limitações: testes de UI usam doubles de DOM/mapa/GPS; não houve navegador real, PWA/APK, dois dispositivos físicos, produção, provedor viário externo nem pagamentos reais. Não encerram Gate A. Próxima ação: TASK-002 e pendências BLK-001 a BLK-005 com o código conciliado; ver next-task.
+
+## PRG-004 — 2026-10-01T15:27:49Z — Codex/ECC
+
+Tarefa: TASK-004 — revisar, criar branch, commit e PR para main, autorizada pelo usuário. Status: revisão concluída; publicação em andamento.
+
+Branch: codex/gate-a-stash-reconciliation. Base local/remota após git fetch: 077ac9fcbe17b3da3348242b2dd863877d47eee3, sem avanço de origin/main. Revisados código conciliado, contratos, filas, migração, testes e registros; stash 8733be6 preservado.
+
+Correção de revisão: CI de unitários agora usa `node --test test/*.test.js`, impedindo descoberta da integração sem banco nesse job. Integração continua obrigando banco dedicado quando invocada; não foi aprovada por skip. README do servidor atualizado para montar esquema/dependências atuais em contêiner temporário e usar variável de ambiente em vez de credenciais literais. Roteiro manual em [tests/manual-gate-a.md](../../tests/manual-gate-a.md).
+
+Reexecução real nesta revisão: npm.cmd test 29/29 e núcleo OK; build aprovado; backend unitários 33/33; sintaxe de src/*.js e server/src/*.js aprovada. Contêiner temporário Node 22/PostgreSQL 17: 34/34 (unitários + integração HTTP), sem migrações pendentes e limpeza dos usuários sintéticos pelo teste. Evidências de 15:27Z, sem alteração no serviço principal.
+
+Conteúdo revisado: sem entradas Git não conciliadas, sem marcadores e diff --check aprovado. Nenhum token/chave privada/JWT literal detectado por padrões de credenciais, seguido de revisão contextual; literais dos testes são sintéticos. node_modules, server/node_modules e dist ignorados; sem .env, log, backup, planilha real ou temporário no conjunto revisado. A verificação não substitui auditoria externa de segredos.
+
+Não houve teste manual real nem aceite do Gate A. Persistem BLK-001 a BLK-005, especialmente controles adicionais da main e retomada de rota encerrada remotamente. Próximo passo: publicar branch e PR sem merge/deploy; depois TASK-002 conforme roteiro.

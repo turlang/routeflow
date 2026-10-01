@@ -1,10 +1,10 @@
 # Bloqueios e pendências de validação
 
-Atualizado em: 2026-09-30T17:10:47Z
+Atualizado em: 2026-10-01T14:12:38Z
 
 Responsável: Codex/ECC
 
-Base inspecionada: `ddd1bb97f20783b93970aa57e3e2bfaefc0446f2` (`origin/main`)
+Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
 Status: aberto
 
@@ -71,5 +71,15 @@ O checkpoint registra PostgreSQL gratuito com expiração em 2026-10-07, deploy 
 Desbloqueio: reconfirmar disponibilidade, validade do banco e revisão implantada antes de teste em produção. Contratação, mudanças de infraestrutura e pagamentos ficam fora desta tarefa.
 
 ## Encerramento de um item
+
+## Adendo de validação — 2026-10-01T14:12:38Z — Codex/ECC
+
+Referência: PRG-003. Os relatos originais acima descrevem a revisão anterior; não são a descrição do código conciliado atual. Todos os itens permanecem abertos para aceite completo.
+
+- BLK-001: storage por API/usuário, quarentena, escopo de requests e limpeza da UI incorporados. Testes A → logout → B, resposta tardia/401, fila e mapa/GPS passaram com doubles. Falta navegador real e cobertura das interfaces adicionais da main, incluindo controles inteligentes, assinante/admin e abas reais.
+- BLK-002: fila de ciclo de vida da rota incorporada; criação offline, progresso/conclusão, reconnect, resposta perdida e retry passaram com doubles. HTTP/PostgreSQL confirmou identidade única, quotas e estado terminal. Falta validar cliente real offline até outro dispositivo e entregas na mesma jornada.
+- BLK-003: preflight local permitido e rejeitado testados na API atual. Rejeição sem allow-origin retorna 500, comportamento preservado da main. Configuração implantada e origens PWA/APK continuam nao_verificado.
+- BLK-004: snapshots, fila de progresso e estados finais preservados; testes isolados passaram. A API de rota ativa ainda pode retornar null e syncActiveRoute preservar cache local sem confirmar o estado remoto final; investigar essa retomada entre dispositivos na TASK-002. Nenhuma evidência física nesta tarefa.
+- BLK-005: ambiente de testes local disponível e atualizado; infraestrutura/expiração do banco de produção e revisão implantada não consultadas. Não houve deploy.
 
 Preservar descrição original. Acrescentar data, responsável, status resolvido/descartado e teste/evidência que sustenta o encerramento, com referência ao progresso. Falta de reprodução isoladamente não prova correção.

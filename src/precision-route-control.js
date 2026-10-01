@@ -2,7 +2,7 @@ const STATE={origin:null,stops:[],run:0,repairing:false};
 const $=id=>document.getElementById(id);
 const normalize=s=>String(s||'').trim().replace(/\s+/g,' ').toLocaleLowerCase('pt-BR');
 const apiBase=()=>{const stored=localStorage.getItem('routeflow.apiBaseUrl.v1');if(stored)return stored.replace(/\/$/,'');return['localhost','127.0.0.1'].includes(location.hostname)?'http://localhost:3001':'https://routeflow-api-tz5q.onrender.com'};
-const rawFetch=window.fetch.bind(window);
+const rawFetch=typeof window!=='undefined'?window.fetch.bind(window):globalThis.fetch;
 function parseStops(rows){const map=new Map();for(const row of rows){const lat=Number(row.Latitude),lon=Number(row.Longitude),address=String(row['Destination Address']||'').trim();if(!Number.isFinite(lat)||!Number.isFinite(lon)||!address)continue;const key=`${lat.toFixed(5)}|${lon.toFixed(5)}`;if(!map.has(key))map.set(key,{key,lat,lon,address});}return[...map.values()]}
 async function readExcel(file){try{const wb=XLSX.read(await file.arrayBuffer(),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],rows=XLSX.utils.sheet_to_json(ws,{defval:''});STATE.stops=parseStops(rows)}catch{STATE.stops=[]}}
 function rememberOrigin(){if(!navigator.geolocation)return;navigator.geolocation.getCurrentPosition(p=>{STATE.origin={lat:p.coords.latitude,lon:p.coords.longitude,accuracy:p.coords.accuracy,at:Date.now()};window.__routeflowRoadOrigin=STATE.origin},{enableHighAccuracy:true,timeout:12000,maximumAge:3000})}

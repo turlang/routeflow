@@ -1,10 +1,10 @@
 # Plano atual
 
-Atualizado em: 2026-09-30T17:10:47Z
+Atualizado em: 2026-10-01T15:27:49Z
 
 Responsável: Codex/ECC
 
-Base inspecionada: `ddd1bb97f20783b93970aa57e3e2bfaefc0446f2` (`origin/main`)
+Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
 ID: PLAN-001
 
@@ -34,6 +34,14 @@ Base remota atual ddd1bb9 restaura o otimizador anterior aos experimentos de GPS
 4. Encerrar o Gate A apenas com evidências de: nenhuma leitura/envio cruzado entre contas; sincronização após reconexão sem perda/duplicação; retomada correta em outro dispositivo; endereços, configurações e histórico consistentes; CORS válido nas origens suportadas; importação e navegação preservadas.
 
 Escopo executado nesta alteração: somente docs/ai/*.md. Não alterar código, migrações, infraestrutura, credenciais, roteamento ou documentos históricos.
+
+## Adendo de escopo — TASK-003 — 2026-10-01T14:12:38Z
+
+O limite documental acima pertence à TASK-001. Nova autorização do usuário: resolver os conflitos de stash apply, preservando o Gate A local e as funcionalidades da main, arquivos novos e stash; testar e atualizar docs/ai, sem push/deploy. Conciliação local concluída, com evidências em PRG-003 e decisão DEC-004. A base local já inclui a ponte documental; não foi feita consulta remota nesta tarefa.
+
+Agora o código incorpora isolamento e filas locais, comprovantes atuais e idempotência sob quotas comerciais. Testes automatizados e integração local passaram; a matriz física/produção ainda não foi executada. Gate A permanece em_validacao. Próximo objetivo continua TASK-002, usando a árvore conciliada; descrições da tabela histórica devem ser lidas com o adendo de blockers.
+
+Adendo TASK-004 — 2026-10-01T15:27:49Z: usuário autorizou revisão, branch própria, commit, publicação no GitHub e PR para main. Revisão/reexecução em PRG-004; proposta na branch codex/gate-a-stash-reconciliation, com main remota confirmada em 077ac9f. Nenhum merge/deploy autorizado; aceite manual permanece TASK-002.
 
 ## Pendências gerais fora deste escopo
 
