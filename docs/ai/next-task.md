@@ -1,6 +1,6 @@
 # Próxima tarefa
 
-Atualizado em: 2026-10-01T15:56:18Z
+Atualizado em: 2026-10-01T16:00:26Z
 
 Responsável: Codex/ECC
 
@@ -65,3 +65,5 @@ Conclusão confirmada: 2026-10-01T15:35:19Z, PR #2 OPEN/MERGEABLE, sem auto-merg
 Data: 2026-10-01T15:49:26Z. Responsável: Codex/ECC. Base 11ca2c8, mesma branch codex/gate-a-stash-reconciliation. Correção do cache após encerramento remoto e workflow pull_request implementados; testes locais 40/40 e núcleo nos dois ambientes Node passaram. Evidência PRG-005. Publicar e verificar check remoto, sem merge/deploy; stash preservado. Depois executar TASK-002 manual usando o roteiro atualizado, especialmente null confirmado versus rede indisponível e conflito com snapshot offline preservado.
 
 Adendo 2026-10-01T15:56:18Z: primeiro check remoto validate SUCCESS no commit 59bc4a1; Gate A/núcleo e verificações existentes passaram. Reconciliação automática no evento online também passou localmente; confirmar check da revisão final. BLK-006 registra três achados high no audit com limiar critical preservado; planejar avaliação compatível de Prisma separadamente.
+
+Conclusão TASK-005 — 2026-10-01T16:00:26Z: commit funcional 017bd3c com reconexão automática aprovado no [check remoto 36888349076](https://github.com/turlang/routeflow/actions/runs/36888349076), todos os passos success. Próxima execução funcional: TASK-002 manual conforme roteiro; Gate A em_validacao e BLK-006 pendente. Stash preservado, sem merge/deploy.

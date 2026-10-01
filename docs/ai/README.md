@@ -1,12 +1,12 @@
 # Ponte de colaboração RouteFlow
 
-Atualizado em: 2026-10-01T15:49:26Z
+Atualizado em: 2026-10-01T16:00:26Z
 
 Responsável: Codex/ECC
 
 Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
-Status: ativo; ponte integrada na main via PR #1. Conciliação revisada e publicada na branch codex/gate-a-stash-reconciliation, [PR #2](https://github.com/turlang/routeflow/pull/2) aberto; ver PRG-005 (TASK-005: encerramento remoto e qualidade no PR). Sem merge/deploy; Gate A em_validacao.
+Status: ativo; ponte integrada na main via PR #1. Conciliação revisada e publicada na branch codex/gate-a-stash-reconciliation, [PR #2](https://github.com/turlang/routeflow/pull/2) aberto; ver PRG-005 (TASK-005 concluída: encerramento remoto, reconexão e qualidade no PR com check remoto aprovado). Sem merge/deploy; Gate A em_validacao.
 
 ## Finalidade e leitura
 

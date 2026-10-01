@@ -1,6 +1,6 @@
 # Plano atual
 
-Atualizado em: 2026-10-01T15:49:26Z
+Atualizado em: 2026-10-01T16:00:26Z
 
 Responsável: Codex/ECC
 
@@ -50,3 +50,5 @@ Adendo TASK-005 — 2026-10-01T15:49:26Z: corrigir encerramento remoto versus fa
 ## Pendências gerais fora deste escopo
 
 O checkpoint mantém gates externos de storage privado, roteamento com SLA, infraestrutura, credenciais de produção e validação móvel. Registra expiração do banco gratuito em 2026-10-07: informação histórica a reconfirmar (BLK-005), sem presumir falha atual ou contratar recursos.
+
+Conclusão TASK-005 — 2026-10-01T16:00:26Z: commit funcional 017bd3c com reconexão automática aprovado no [check remoto 36888349076](https://github.com/turlang/routeflow/actions/runs/36888349076), todos os passos success. Próxima execução funcional: TASK-002 manual conforme roteiro; Gate A em_validacao e BLK-006 pendente. Stash preservado, sem merge/deploy.

@@ -1,12 +1,12 @@
 # Progresso e evidências
 
-Atualizado em: 2026-10-01T15:56:18Z
+Atualizado em: 2026-10-01T16:00:26Z
 
 Responsável: Codex/ECC
 
 Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
-Status: em_andamento (TASK-005 checks remotos; Gate A em_validacao)
+Status: TASK-005 concluída; Gate A em_validacao
 
 ## PRG-001 — 2026-09-30T17:10:47Z — Codex/ECC
 
@@ -119,3 +119,9 @@ Commit 59bc4a1dc88e35d16269966c35eaf1a4da77d21b publicado no PR #2. [Run 3688775
 Auditoria manteve o critério existente `--audit-level=critical` e passou, porém reportou 3 achados high na cadeia deepmerge-ts → @prisma/config → prisma. Registrado BLK-006, sem executar audit fix --force nem mudar dependências nesta correção. Check verde não significa ausência de vulnerabilidades altas.
 
 Conferência adicional: evento online também chama recoverActiveRoute para reconciliar cache após reconexão sem recarga. Teste de UI cobre essa reconciliação automática; novamente 40/40 e núcleo aprovados em Windows/Node 24 e Linux/Node 22, build aprovado. A alteração de reconexão segue em publicação na mesma branch; resultado remoto da nova revisão será confirmado antes da entrega.
+
+### Conclusão TASK-005 — 2026-10-01T16:00:26Z
+
+Correção completa publicada no commit 017bd3c26d93253e0165604120a35cbe0bb5adf2, incluindo recuperação no evento online. [Run 36888349076](https://github.com/turlang/routeflow/actions/runs/36888349076), pull_request: validate SUCCESS, concluído em 2026-10-01T15:58:56Z; todos os passos existentes e Gate A/núcleo aprovados. Evidências locais: 40/40 Gate A + núcleo em Windows e Linux, 33/33 backend, build e sintaxe aprovados. Integração HTTP/PostgreSQL não reexecutada nesta tarefa.
+
+TASK-005 concluída; Gate A permanece em_validacao até os testes manuais de isolamento A/B, dois dispositivos, offline/reconexão, retomada e PWA/APK/CORS. BLK-006 permanece aberto para os 3 achados high da auditoria. Sem conflitos, sem merge/deploy; stash 8733be6d1b05cbf2058ee1248d505d9e61121ef8 preservado. Este registro documental será publicado na mesma branch do PR #2.
