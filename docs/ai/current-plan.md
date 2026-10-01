@@ -1,6 +1,6 @@
 # Plano atual
 
-Atualizado em: 2026-10-01T15:35:19Z
+Atualizado em: 2026-10-01T15:49:26Z
 
 Responsável: Codex/ECC
 
@@ -44,6 +44,8 @@ Agora o código incorpora isolamento e filas locais, comprovantes atuais e idemp
 Adendo TASK-004 — 2026-10-01T15:27:49Z: usuário autorizou revisão, branch própria, commit, publicação no GitHub e PR para main. Revisão/reexecução em PRG-004; proposta na branch codex/gate-a-stash-reconciliation, com main remota confirmada em 077ac9f. Nenhum merge/deploy autorizado; aceite manual permanece TASK-002.
 
 Conclusão de publicação — 2026-10-01T15:35:19Z: TASK-004 concluída, [PR #2](https://github.com/turlang/routeflow/pull/2) aberto e mergeável. Commit funcional 244c6ad na branch própria; nenhum merge/deploy, stash preservado. TASK-002 e Gate A continuam em validação manual, conforme PRG-004 e roteiro.
+
+Adendo TASK-005 — 2026-10-01T15:49:26Z: corrigir encerramento remoto versus falha de rede com preservação de fila offline; acrescentar regressões e ativar qualidade em pull_request para main, incluindo Gate A/núcleo e mantendo verificações existentes. Implementado e validado localmente em PRG-005/DEC-006; publicar na mesma branch e acompanhar checks remotos. Não encerrar Gate A sem matriz manual; nenhum merge/deploy.
 
 ## Pendências gerais fora deste escopo
 

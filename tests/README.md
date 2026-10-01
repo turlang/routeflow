@@ -23,3 +23,10 @@ database. See `server/README.md`. Tests refuse other database names and delete
 only the test users they created. The application database is not used.
 
 Browser scenarios: [manual Gate A checklist](manual-gate-a.md).
+
+Active-route recovery distinguishes a confirmed JSON null from network/HTTP,
+invalid JSON and invalid route responses. Confirmed absence clears only an
+obsolete active cache without pending edits; history/outboxes remain intact.
+Concurrent edits during GET and account switches are covered. A confirmed
+remote terminal state closes navigation while preserving conflicting offline
+snapshots in a blocked outbox for review.

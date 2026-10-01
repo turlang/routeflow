@@ -1,6 +1,6 @@
 # Próxima tarefa
 
-Atualizado em: 2026-10-01T15:35:19Z
+Atualizado em: 2026-10-01T15:49:26Z
 
 Responsável: Codex/ECC
 
@@ -59,3 +59,7 @@ Adendo de 2026-10-01T14:12:38Z: main local 077ac9f já contém o merge do PR #1 
 Data: 2026-10-01T15:27:49Z. Branch codex/gate-a-stash-reconciliation, base 077ac9f confirmada por fetch. Usuario autorizou commit, push e PR; nao autorizou merge/deploy. Ler PRG-004 e [roteiro manual](../../tests/manual-gate-a.md). Stash 8733be6 preservado, sem reaplicacao. Proxima execucao funcional continua TASK-002.
 
 Conclusão confirmada: 2026-10-01T15:35:19Z, PR #2 OPEN/MERGEABLE, sem auto-merge. TASK-004 concluída; testes automatizados aprovados localmente, nenhum check remoto disparado. Registrar evidências manuais e falhas de BLK-001 a BLK-004 antes de declarar aceite do Gate A.
+
+## TASK-005 — Continuação no PR #2
+
+Data: 2026-10-01T15:49:26Z. Responsável: Codex/ECC. Base 11ca2c8, mesma branch codex/gate-a-stash-reconciliation. Correção do cache após encerramento remoto e workflow pull_request implementados; testes locais 40/40 e núcleo nos dois ambientes Node passaram. Evidência PRG-005. Publicar e verificar check remoto, sem merge/deploy; stash preservado. Depois executar TASK-002 manual usando o roteiro atualizado, especialmente null confirmado versus rede indisponível e conflito com snapshot offline preservado.

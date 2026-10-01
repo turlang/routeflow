@@ -1,12 +1,12 @@
 # Progresso e evidências
 
-Atualizado em: 2026-10-01T15:35:19Z
+Atualizado em: 2026-10-01T15:49:26Z
 
 Responsável: Codex/ECC
 
 Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
-Status: concluida (TASK-004 proposta publicada; Gate A em_validacao)
+Status: em_andamento (TASK-005 checks remotos; Gate A em_validacao)
 
 ## PRG-001 — 2026-09-30T17:10:47Z — Codex/ECC
 
@@ -93,3 +93,21 @@ Não houve teste manual real nem aceite do Gate A. Persistem BLK-001 a BLK-005, 
 TASK-004 concluída: commit de código/revisão `244c6ad5de586cc0a79c27b674a2a0528c0a22a1` publicado na branch codex/gate-a-stash-reconciliation; [PR #2](https://github.com/turlang/routeflow/pull/2) aberto para main. Consulta via gh confirma OPEN, MERGEABLE, mergedAt null e autoMergeRequest null. Nenhum merge/deploy executado. Este adendo documental será publicado na mesma branch.
 
 Os workflows atuais não disparam checks no PR/nessa branch: statusCheckRollup vazio. Resultados acima são execuções locais e integração em contêiner, não CI remoto aprovado. Stash `8733be6d1b05cbf2058ee1248d505d9e61121ef8` intacto; árvore limpa após o commit inicial, nenhuma entrada não conciliada. Próximo passo: usuário/testador executar [roteiro manual](../../tests/manual-gate-a.md) usando frontend/API desta branch em ambiente de teste, registrar resultado em TASK-002, revisar PR; Gate A permanece em_validacao.
+
+## PRG-005 — 2026-10-01T15:49:26Z — Codex/ECC
+
+Tarefa: TASK-005 — corrigir encerramento remoto e habilitar qualidade no PR #2. Status: implementação/validação local concluídas; checks remotos aguardando publicação.
+
+Branch: codex/gate-a-stash-reconciliation. Base da tarefa: 11ca2c8d0bf5b0dcc906d4408f4873bdebc0d733; origin/main confirmado por fetch em 077ac9f. Escopo autorizado pelo usuário: correção incremental, regressões, workflow, documentação e publicação na mesma branch, sem merge/deploy. Stash 8733be6 preservado.
+
+Correção: getActiveRoute aceita ausência somente com JSON válido null, rejeitando forma inválida; a API não converte erro de parsing bem-sucedido em ausência. syncActiveRoute preserva cache em falha de rede/HTTP/parsing e mantém fila pendente. Sem pendências da rota, ausência confirmada remove apenas cache ativo, preservando histórico/outras filas; edições e nova rota durante GET são conferidas novamente antes de aplicar a resposta. Resposta antiga de A não altera B.
+
+Estado terminal confirmado na resposta do retry fecha a navegação/retomada, mas mantém o snapshot offline conflitante na outbox bloqueada, com mensagem de atenção. Não descarta alterações pendentes nem reabre a rota no servidor. Na UI, limpeza ocorre apenas para a identidade da rota exibida; planilha nova ainda não iniciada não é apagada por ausência da rota anterior. restoreOperational recusa estado terminal.
+
+Regressões novas em active-route-recovery.test.mjs: null sem fila, histórico e outras filas preservados, falha de rede/HTTP, JSON/forma inválidos, fila offline, edição/nova rota durante GET, troca A/B e COMPLETED/CANCELLED conflitantes. Teste de UI ampliado verifica encerramento de navegador/GPS/retomada após ausência remota confirmada, com doubles.
+
+Workflow commercial-readiness: pull_request para main, além de push main e workflow_dispatch; novo passo npm test (Gate A + núcleo). Preservados instalação backend, Prisma validate/generate, sintaxe frontend/backend/sw, 33 unitários backend, auditoria crítica de dependências e verificação de artefatos. Não adicionada ação de deploy.
+
+Validação real local: 40/40 testes Gate A e core tests OK em Windows/Node 24.16.0; mesmos 40/40 e núcleo em contêiner temporário Linux/Node 22.23.2. Build Vite aprovado. Backend 33/33 unitários; sintaxe de src, server/src e sw aprovada; diff --check sem erros. Falha inicial de duas regressões por espera do timer do lease corrigida usando sinal explícito de requisição iniciada. Nenhuma falha intermediária foi contada como aprovação.
+
+Não alterados backend/esquema/migrações; integração HTTP/PostgreSQL da PRG-004 permanece evidência histórica de sua execução, não foi reexecutada nesta tarefa. Novos testes e workflow não validam PWA/APK nem dois dispositivos físicos. Roteiro manual atualizado: comparar null confirmado com rede bloqueada e estado final com edição offline pendente. Gate A continua em_validacao, BLK-004 ainda exige reprodução física. Próximo passo: publicar e acompanhar checks remotos do PR; registrar resultado efetivo abaixo.

@@ -1,6 +1,6 @@
 # Registro de decisões
 
-Atualizado em: 2026-10-01T15:27:49Z
+Atualizado em: 2026-10-01T15:49:26Z
 
 Responsável: Codex/ECC
 
@@ -65,3 +65,9 @@ Copiar para uma nova entrada: ID DEC; timestamp; responsável; status proposta/a
 Data: 2026-10-01T15:27:49Z | Responsável: Codex/ECC | Status: aceita.
 
 Origem: nova autorização explícita do usuário para branch própria, commit, push e PR para main. Preservar stash; merge/deploy não autorizados. A restrição de publicação da TASK-003 é histórica; limites físicos/produção de DEC-004 continuam. Branch codex/gate-a-stash-reconciliation, base origin/main 077ac9f confirmada por fetch; evidências PRG-004. Gate A permanece em_validacao.
+
+## DEC-006 — Ausência confirmada e conflito offline
+
+Data: 2026-10-01T15:49:26Z | Responsável: Codex/ECC | Status: aceita.
+
+Autorização: continuação explícita no PR #2, correção e checks, sem merge/deploy. Ausência de rota é somente JSON null de resposta HTTP bem-sucedida, nunca falha de rede/parsing. Aplicar resposta apenas se não houver edição pendente ou nova identidade durante a espera. Histórico/outboxes permanecem preservados. Quando o servidor confirma estado final conflitante, desabilitar retomada e conservar o snapshot pendente em fila bloqueada para revisão, em vez de apagar dados ou reabrir a rota. Evidência PRG-005; validação física permanece pendente.

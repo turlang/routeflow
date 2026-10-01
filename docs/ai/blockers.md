@@ -1,6 +1,6 @@
 # Bloqueios e pendências de validação
 
-Atualizado em: 2026-10-01T14:12:38Z
+Atualizado em: 2026-10-01T15:49:26Z
 
 Responsável: Codex/ECC
 
@@ -83,3 +83,11 @@ Referência: PRG-003. Os relatos originais acima descrevem a revisão anterior; 
 - BLK-005: ambiente de testes local disponível e atualizado; infraestrutura/expiração do banco de produção e revisão implantada não consultadas. Não houve deploy.
 
 Preservar descrição original. Acrescentar data, responsável, status resolvido/descartado e teste/evidência que sustenta o encerramento, com referência ao progresso. Falta de reprodução isoladamente não prova correção.
+
+## BLK-004 — Adendo TASK-005 — 2026-10-01T15:49:26Z
+
+Responsável: Codex/ECC | Status: aberto para validação manual | Evidência: validado_por_teste, PRG-005.
+
+Corrigida a preservação incondicional do cache diante de null remoto: ausência válida confirmada e sem pendências limpa rota ativa/UI; erro de rede, HTTP ou JSON mantém cache. Edição/nova rota durante consulta e troca de conta são protegidas. Estado terminal conflitante fecha retomada e preserva snapshot offline na fila bloqueada. Regressões passaram nos dois sistemas/versões Node, incluindo UI com doubles.
+
+O risco de código registrado no adendo anterior foi tratado, sem afirmar aceite físico. Ainda validar duas sessões/dispositivos reais, abrir/fechar/reconectar, encerramento remoto com e sem fila e revisão visível do conflito. BLK-001, BLK-002, BLK-003 e BLK-005 mantêm pendências anteriores. Não houve produção/deploy.

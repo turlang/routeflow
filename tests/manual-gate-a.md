@@ -46,9 +46,18 @@ Address e Sequence (coordenadas válidas, sem 0,0).
    mesma ordem, próximo destino, dados da planilha e histórico.
 2. Entre como A em outro perfil/dispositivo com a mesma API. Confira snapshot e
    progresso; avance nos dois clientes e reconecte, sem regressão/duplicação.
-3. Conclua/cancele no segundo cliente e reabra o primeiro: não deve ressuscitar
-   a rota. Este é um risco conhecido pendente (BLK-004): ausência de rota ativa
-   remota pode preservar cache local. Registre falha e não encerre Gate A.
+3. Sem fila local pendente, conclua/cancele no segundo cliente e reabra o
+   primeiro online: a resposta confirmada sem rota ativa deve remover a retomada
+   antiga e fechar mapa/GPS dessa rota. Histórico deve continuar disponível.
+4. Repita bloqueando a API ou ficando offline no primeiro cliente: falha de rede
+   não confirma encerramento e deve preservar o cache para retomada offline.
+5. Repita com avanço offline pendente no primeiro cliente. Se o servidor confirmar
+   estado final conflitante, a navegação deve fechar e a fila deve guardar o
+   snapshot offline com mensagem de atenção. Não deve reabrir a rota no servidor
+   nem apagar silenciosamente a alteração local. Registre o conflito para revisão.
+
+A correção destes casos tem regressões automatizadas; a reprodução real em dois
+dispositivos ainda é necessária para fechar BLK-004 e aceitar Gate A.
 
 PWA/APK, CORS implantado, recarga completa offline, provedor viário e pagamentos
 reais permanecem pendentes. Nunca inclua senhas, tokens ou dados reais no relato.

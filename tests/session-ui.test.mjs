@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {environment,response,session} from './helpers.mjs';
 import {saveSession,authUser} from '../src/api.js';
 import {writeData,readData} from '../src/storage.js';
+import {syncActiveRoute} from '../src/route-session.js';
 
 test('real UI session handlers clear A workspace, maps and GPS on logout before B', async () => {
   environment();window.scrollTo=()=>{};
@@ -62,4 +63,16 @@ test('real UI session handlers clear A workspace, maps and GPS on logout before 
   assert.ok(layers.some(value=>value.removed));
   saveSession(session('B'));assert.equal(authUser().id,'B');assert.equal(readData('activeRoute',null),null);
   assert.equal(nodes.get('workspace').hidden,true);assert.doesNotMatch(nodes.get('historyList').innerHTML,/Private A address/);
+  // A restored route must close its navigator/GPS after another device ends it.
+  saveSession(session('A'));writeData('routeOutbox',{});
+  writeData('activeRoute',{clientId:'remote-ended',serverId:'remote-ended',status:'ACTIVE',completedStops:0,stops:1,operational:{stops:[stop],order:[0],headers:['Destination Address'],routeStats:{distance:1000,duration:60,total:4}}});
+  window.dispatchEvent(new Event('routeflow:active-route-synced'));
+  nodes.get('startRoute').dispatchEvent(new Event('click'));
+  await new Promise(resolve=>setImmediate(resolve));
+  assert.equal(nodes.get('navigator').hidden,false);
+  globalThis.fetch=async()=>response(null);
+  assert.equal(await syncActiveRoute(),null);
+  assert.equal(nodes.get('navigator').hidden,true);assert.equal(nodes.get('workspace').hidden,true);
+  assert.equal(nodes.get('manualList').innerHTML,'');assert.equal(nodes.get('startRoute').disabled,true);
+  assert.deepEqual(cleared,[0,0]);assert.equal(window.routeflowLastPosition,null);
 });

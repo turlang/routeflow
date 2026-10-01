@@ -15,7 +15,7 @@ export async function api(path,{method='GET',body,auth=true,scope=captureScope()
   if(auth&&scope.token)headers.Authorization=`Bearer ${scope.token}`;
   const response=await fetch(`${base}${path}`,{method,headers,body:body===undefined?undefined:JSON.stringify(body),signal:AbortSignal.timeout(15000)});
   let data=null;
-  try{data=await response.json()}catch{}
+  try{data=await response.json()}catch{if(response.ok){assertScope(scope);throw new Error('Resposta JSON inválida da API.')}}
   assertScope(scope);
   if(!response.ok){const error=new Error(data?.error||`Falha HTTP ${response.status}`);error.status=response.status;if(response.status===401&&auth)clearSession();throw error}
   return data
@@ -30,7 +30,11 @@ export const listDeliveries=()=>api('/v1/deliveries');
 export const createDelivery=body=>api('/v1/deliveries',{method:'POST',body});
 export const importDeliveries=deliveries=>api('/v1/deliveries/import',{method:'POST',body:{deliveries}});
 export const listRoutes=()=>api('/v1/routes');
-export const getActiveRoute=()=>api('/v1/routes/active');
+export async function getActiveRoute(){
+  const route=await api('/v1/routes/active');
+  if(route!==null&&(!route||typeof route.id!=='string'||route.status!=='ACTIVE'))throw new Error('Resposta de rota ativa inválida.');
+  return route;
+}
 export const createRoute=body=>api('/v1/routes',{method:'POST',body});
 export const updateRoute=(id,body)=>api(`/v1/routes/${encodeURIComponent(id)}`,{method:'PATCH',body});
 

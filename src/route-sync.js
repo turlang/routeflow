@@ -63,9 +63,13 @@ async function processQueue(scope, force, ownsLock = () => true) {
       if (latest.revision === item.revision && remote.status === latest.route.status && Number(remote.completedStops) >= Number(latest.route.completedStops)) {
         cacheRoute({...latest.route,completedStops:Math.max(latest.route.completedStops,remote.completedStops)}, scope);
         delete queue[clientId];
-      } else if (latest.revision === item.revision && ['COMPLETED','CANCELLED'].includes(remote.status) && remote.status !== latest.route.status) {
+      } else if (['COMPLETED','CANCELLED'].includes(remote.status) && remote.status !== latest.route.status) {
         latest.blocked = true;
         latest.error = 'A rota possui outro estado final no servidor. Revise a sincronização.';
+        // Keep the offline snapshot in the blocked outbox for review, but stop
+        // offering a route that the server has definitively ended for resume.
+        cacheRoute({...latest.route,status:remote.status,finishedAt:remote.finishedAt,completedStops:remote.completedStops}, scope);
+        window.dispatchEvent(new CustomEvent('routeflow:active-route-cleared',{detail:{clientId}}));
       } else {
         latest.nextAttemptAt = 0;
         cacheRoute(latest.route, scope);
