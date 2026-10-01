@@ -1,6 +1,6 @@
 # Próxima tarefa
 
-Atualizado em: 2026-10-01T15:27:49Z
+Atualizado em: 2026-10-01T15:35:19Z
 
 Responsável: Codex/ECC
 
@@ -18,7 +18,7 @@ Branch da proposta atual: codex/gate-a-stash-reconciliation; TASK-002 fisica ain
 
 Base: atualizar origin/main e registrar SHA antes da execução
 
-Passagem atual: TASK-003 concluída localmente em main, base 077ac9f, com alterações ainda sem commit. Ler PRG-003 antes de iniciar; preservar árvore conciliada e stash 8733be6. Não reaplicar o mesmo stash sobre esta árvore. Continuação física da TASK-002 ainda não executada; limites de diagnóstico abaixo continuam válidos para a próxima tarefa. Não publicar nem implantar sem autorização correspondente.
+Passagem atual: TASK-003 conciliada e TASK-004 publicada na branch codex/gate-a-stash-reconciliation, [PR #2](https://github.com/turlang/routeflow/pull/2) aberto para main. Commit funcional/revisão 244c6ad, base 077ac9f. Ler PRG-003/PRG-004; preservar stash 8733be6 sem reaplicação. TASK-002 física ainda pendente: usar [roteiro manual](../../tests/manual-gate-a.md). Merge/deploy não autorizados nesta etapa.
 
 ## Objetivo
 
@@ -57,3 +57,5 @@ Adendo de 2026-10-01T14:12:38Z: main local 077ac9f já contém o merge do PR #1 
 ## TASK-004 - revisao e publicacao autorizadas
 
 Data: 2026-10-01T15:27:49Z. Branch codex/gate-a-stash-reconciliation, base 077ac9f confirmada por fetch. Usuario autorizou commit, push e PR; nao autorizou merge/deploy. Ler PRG-004 e [roteiro manual](../../tests/manual-gate-a.md). Stash 8733be6 preservado, sem reaplicacao. Proxima execucao funcional continua TASK-002.
+
+Conclusão confirmada: 2026-10-01T15:35:19Z, PR #2 OPEN/MERGEABLE, sem auto-merge. TASK-004 concluída; testes automatizados aprovados localmente, nenhum check remoto disparado. Registrar evidências manuais e falhas de BLK-001 a BLK-004 antes de declarar aceite do Gate A.

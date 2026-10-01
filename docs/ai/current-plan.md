@@ -1,6 +1,6 @@
 # Plano atual
 
-Atualizado em: 2026-10-01T15:27:49Z
+Atualizado em: 2026-10-01T15:35:19Z
 
 Responsável: Codex/ECC
 
@@ -42,6 +42,8 @@ O limite documental acima pertence à TASK-001. Nova autorização do usuário: 
 Agora o código incorpora isolamento e filas locais, comprovantes atuais e idempotência sob quotas comerciais. Testes automatizados e integração local passaram; a matriz física/produção ainda não foi executada. Gate A permanece em_validacao. Próximo objetivo continua TASK-002, usando a árvore conciliada; descrições da tabela histórica devem ser lidas com o adendo de blockers.
 
 Adendo TASK-004 — 2026-10-01T15:27:49Z: usuário autorizou revisão, branch própria, commit, publicação no GitHub e PR para main. Revisão/reexecução em PRG-004; proposta na branch codex/gate-a-stash-reconciliation, com main remota confirmada em 077ac9f. Nenhum merge/deploy autorizado; aceite manual permanece TASK-002.
+
+Conclusão de publicação — 2026-10-01T15:35:19Z: TASK-004 concluída, [PR #2](https://github.com/turlang/routeflow/pull/2) aberto e mergeável. Commit funcional 244c6ad na branch própria; nenhum merge/deploy, stash preservado. TASK-002 e Gate A continuam em validação manual, conforme PRG-004 e roteiro.
 
 ## Pendências gerais fora deste escopo
 

@@ -1,12 +1,12 @@
 # Progresso e evidências
 
-Atualizado em: 2026-10-01T15:27:49Z
+Atualizado em: 2026-10-01T15:35:19Z
 
 Responsável: Codex/ECC
 
 Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
-Status: em_andamento (TASK-004 revisao/publicacao; Gate A em_validacao)
+Status: concluida (TASK-004 proposta publicada; Gate A em_validacao)
 
 ## PRG-001 — 2026-09-30T17:10:47Z — Codex/ECC
 
@@ -87,3 +87,9 @@ Reexecução real nesta revisão: npm.cmd test 29/29 e núcleo OK; build aprovad
 Conteúdo revisado: sem entradas Git não conciliadas, sem marcadores e diff --check aprovado. Nenhum token/chave privada/JWT literal detectado por padrões de credenciais, seguido de revisão contextual; literais dos testes são sintéticos. node_modules, server/node_modules e dist ignorados; sem .env, log, backup, planilha real ou temporário no conjunto revisado. A verificação não substitui auditoria externa de segredos.
 
 Não houve teste manual real nem aceite do Gate A. Persistem BLK-001 a BLK-005, especialmente controles adicionais da main e retomada de rota encerrada remotamente. Próximo passo: publicar branch e PR sem merge/deploy; depois TASK-002 conforme roteiro.
+
+### Publicação confirmada — 2026-10-01T15:35:19Z
+
+TASK-004 concluída: commit de código/revisão `244c6ad5de586cc0a79c27b674a2a0528c0a22a1` publicado na branch codex/gate-a-stash-reconciliation; [PR #2](https://github.com/turlang/routeflow/pull/2) aberto para main. Consulta via gh confirma OPEN, MERGEABLE, mergedAt null e autoMergeRequest null. Nenhum merge/deploy executado. Este adendo documental será publicado na mesma branch.
+
+Os workflows atuais não disparam checks no PR/nessa branch: statusCheckRollup vazio. Resultados acima são execuções locais e integração em contêiner, não CI remoto aprovado. Stash `8733be6d1b05cbf2058ee1248d505d9e61121ef8` intacto; árvore limpa após o commit inicial, nenhuma entrada não conciliada. Próximo passo: usuário/testador executar [roteiro manual](../../tests/manual-gate-a.md) usando frontend/API desta branch em ambiente de teste, registrar resultado em TASK-002, revisar PR; Gate A permanece em_validacao.
