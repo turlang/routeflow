@@ -1,10 +1,10 @@
 # Plano atual
 
-Atualizado em: 2026-09-30T17:10:47Z
+Atualizado em: 2026-10-01T16:00:26Z
 
 Responsável: Codex/ECC
 
-Base inspecionada: `ddd1bb97f20783b93970aa57e3e2bfaefc0446f2` (`origin/main`)
+Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
 ID: PLAN-001
 
@@ -35,6 +35,20 @@ Base remota atual ddd1bb9 restaura o otimizador anterior aos experimentos de GPS
 
 Escopo executado nesta alteração: somente docs/ai/*.md. Não alterar código, migrações, infraestrutura, credenciais, roteamento ou documentos históricos.
 
+## Adendo de escopo — TASK-003 — 2026-10-01T14:12:38Z
+
+O limite documental acima pertence à TASK-001. Nova autorização do usuário: resolver os conflitos de stash apply, preservando o Gate A local e as funcionalidades da main, arquivos novos e stash; testar e atualizar docs/ai, sem push/deploy. Conciliação local concluída, com evidências em PRG-003 e decisão DEC-004. A base local já inclui a ponte documental; não foi feita consulta remota nesta tarefa.
+
+Agora o código incorpora isolamento e filas locais, comprovantes atuais e idempotência sob quotas comerciais. Testes automatizados e integração local passaram; a matriz física/produção ainda não foi executada. Gate A permanece em_validacao. Próximo objetivo continua TASK-002, usando a árvore conciliada; descrições da tabela histórica devem ser lidas com o adendo de blockers.
+
+Adendo TASK-004 — 2026-10-01T15:27:49Z: usuário autorizou revisão, branch própria, commit, publicação no GitHub e PR para main. Revisão/reexecução em PRG-004; proposta na branch codex/gate-a-stash-reconciliation, com main remota confirmada em 077ac9f. Nenhum merge/deploy autorizado; aceite manual permanece TASK-002.
+
+Conclusão de publicação — 2026-10-01T15:35:19Z: TASK-004 concluída, [PR #2](https://github.com/turlang/routeflow/pull/2) aberto e mergeável. Commit funcional 244c6ad na branch própria; nenhum merge/deploy, stash preservado. TASK-002 e Gate A continuam em validação manual, conforme PRG-004 e roteiro.
+
+Adendo TASK-005 — 2026-10-01T15:49:26Z: corrigir encerramento remoto versus falha de rede com preservação de fila offline; acrescentar regressões e ativar qualidade em pull_request para main, incluindo Gate A/núcleo e mantendo verificações existentes. Implementado e validado localmente em PRG-005/DEC-006; publicar na mesma branch e acompanhar checks remotos. Não encerrar Gate A sem matriz manual; nenhum merge/deploy.
+
 ## Pendências gerais fora deste escopo
 
 O checkpoint mantém gates externos de storage privado, roteamento com SLA, infraestrutura, credenciais de produção e validação móvel. Registra expiração do banco gratuito em 2026-10-07: informação histórica a reconfirmar (BLK-005), sem presumir falha atual ou contratar recursos.
+
+Conclusão TASK-005 — 2026-10-01T16:00:26Z: commit funcional 017bd3c com reconexão automática aprovado no [check remoto 36888349076](https://github.com/turlang/routeflow/actions/runs/36888349076), todos os passos success. Próxima execução funcional: TASK-002 manual conforme roteiro; Gate A em_validacao e BLK-006 pendente. Stash preservado, sem merge/deploy.

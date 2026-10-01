@@ -1,14 +1,45 @@
-import{apiBase,hasSession,createRoute,updateRoute,getActiveRoute}from'./api.js';
-import{saveLocalRoute,cancelOtherActiveRoutes}from'./route-history-ui.js';
-const KEY='routeflow.activeRoute.v1';
-const enabled=()=>Boolean(apiBase()&&hasSession());
-const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'null')}catch{return null}};
-const write=v=>{localStorage.setItem(KEY,JSON.stringify(v));window.dispatchEvent(new CustomEvent('routeflow:active-route-synced',{detail:v}))};
-const fromRemote=r=>r?{clientId:r.clientId||`server-${r.id}`,serverId:r.id,sourceFilename:r.sourceFilename,status:r.status,startedAt:r.startedAt,finishedAt:r.finishedAt,plannedKm:r.plannedKm,plannedMinutes:r.plannedMinutes,stops:r.stops,deliveries:r.deliveriesCount,completedStops:r.completedStops||0,operational:r.operational,updatedAt:r.updatedAt}:null;
+import {getActiveRoute} from './api.js';
+import {captureScope,assertScope,isCurrentScope,readData,writeData,removeData} from './storage.js';
+import {saveLocalRoute} from './route-history-ui.js';
+import {enqueueRoute,flushRouteQueue,requestRouteSync} from './route-sync.js';
+const read=()=>readData('activeRoute',null);
+const write=(route,scope=captureScope())=>{writeData('activeRoute',route,scope);window.dispatchEvent(new CustomEvent('routeflow:active-route-synced',{detail:route}))};
+const fromRemote=r=>({...r,clientId:r.clientId||`server-${r.id}`,serverId:r.id,deliveries:r.deliveriesCount});
 export function activeRoute(){return read()}
 export function resumableRoute(){const route=read();return route?.status==='ACTIVE'?route:null}
-export async function syncActiveRoute(){if(!enabled())return read();try{const remote=await getActiveRoute();if(!remote)return read();const cloud=fromRemote(remote),local=read();if(local?.clientId===cloud.clientId){const localProgress=Number(local.completedStops||0),cloudProgress=Number(cloud.completedStops||0);if(localProgress>cloudProgress){cloud.completedStops=localProgress;cloud.operational=local.operational||cloud.operational;try{const patched=await updateRoute(cloud.serverId,{completedStops:localProgress,operational:cloud.operational});cloud.updatedAt=patched.updatedAt}catch{}}}write(cloud);saveLocalRoute(cloud);return cloud}catch{return read()}}
-export async function beginRoute({sourceFilename,plannedKm,plannedMinutes,stops,deliveries,operational}){const previous=read();if(previous?.status==='ACTIVE'){previous.status='CANCELLED';previous.finishedAt=new Date().toISOString();saveLocalRoute(previous);if(enabled()&&previous.serverId)updateRoute(previous.serverId,{status:'CANCELLED',finishedAt:previous.finishedAt}).catch(()=>{})}cancelOtherActiveRoutes();const startedAt=new Date().toISOString(),local={clientId:`route-${Date.now()}-${Math.random().toString(36).slice(2)}`,sourceFilename,status:'ACTIVE',startedAt,plannedKm,plannedMinutes,stops,deliveries,completedStops:0,operational};write(local);saveLocalRoute(local);if(enabled()){try{const remote=await createRoute({clientId:local.clientId,sourceFilename,startedAt,plannedKm,plannedMinutes,stops,deliveriesCount:deliveries,completedStops:0,operational});local.serverId=remote.id;local.updatedAt=remote.updatedAt;write(local);saveLocalRoute(local)}catch{}}return local}
-export async function markRouteProgress(completedStops){const route=read();if(!route)return null;route.completedStops=Math.max(Number(route.completedStops||0),Number(completedStops||0));write(route);saveLocalRoute(route);if(enabled()&&route.serverId){try{const remote=await updateRoute(route.serverId,{completedStops:route.completedStops,operational:route.operational});route.completedStops=Math.max(route.completedStops,Number(remote.completedStops||0));route.updatedAt=remote.updatedAt;write(route);saveLocalRoute(route)}catch{}}return route}
-export async function finishRoute(){const route=read();if(!route)return null;route.status='COMPLETED';route.finishedAt=new Date().toISOString();write(route);saveLocalRoute(route);if(enabled()&&route.serverId){try{await updateRoute(route.serverId,{status:'COMPLETED',finishedAt:route.finishedAt,completedStops:route.completedStops,operational:route.operational})}catch{}}return route}
-export function clearActiveRoute(){localStorage.removeItem(KEY)}
+function persist(route,scope){enqueueRoute(route,scope);write(route,scope);saveLocalRoute(route);requestRouteSync();return route}
+export async function syncActiveRoute(){
+ const scope=captureScope();if(!scope.userId)return read();
+ await flushRouteQueue({force:true});assertScope(scope);
+ const queue=readData('routeOutbox',{},scope),local=read();
+ if(local&&queue[local.clientId])return local;
+ try{
+  const remote=await getActiveRoute();assertScope(scope);
+  // Edits can happen while the GET is in flight. Neither an empty response nor
+  // another cloud route may discard a newly queued local snapshot.
+  const latest=read(),pending=readData('routeOutbox',{},scope);
+  if(latest&&pending[latest.clientId])return latest;
+  if(latest?.clientId!==local?.clientId)return latest;
+  if(remote===null){
+   clearActiveRoute(scope);
+   return null;
+  }
+  const cloud=fromRemote(remote);write(cloud,scope);saveLocalRoute(cloud);return cloud;
+ }
+ catch(error){if(!isCurrentScope(scope))throw error;return read()}
+}
+export async function beginRoute({sourceFilename,plannedKm,plannedMinutes,stops,deliveries,operational}){
+ const scope=captureScope(),now=new Date().toISOString();
+ const history=readData('routeHistory',[],scope),previous=read();
+ if(previous?.status==='ACTIVE'&&!history.some(r=>r.clientId===previous.clientId))history.push(previous);
+ for(const old of history)if(old.status==='ACTIVE'){const cancelled={...old,status:'CANCELLED',finishedAt:now};enqueueRoute(cancelled,scope);saveLocalRoute(cancelled)}
+ const route={clientId:`route-${crypto.randomUUID()}`,userId:scope.userId,sourceFilename,status:'ACTIVE',startedAt:now,plannedKm,plannedMinutes,stops,deliveries,completedStops:0,operational};
+ persist(route,scope);await flushRouteQueue();assertScope(scope);return read();
+}
+export async function markRouteProgress(completedStops,operational){const scope=captureScope(),route=read();if(!route)return null;route.completedStops=Math.max(route.completedStops||0,completedStops);if(operational)route.operational=operational;persist(route,scope);return route}
+export async function finishRoute(){const scope=captureScope(),route=read();if(!route)return null;route.status='COMPLETED';route.finishedAt=new Date().toISOString();persist(route,scope);return route}
+export function clearActiveRoute(scope=captureScope()){
+ const route=readData('activeRoute',null,scope);
+ removeData('activeRoute',scope);
+ window.dispatchEvent(new CustomEvent('routeflow:active-route-cleared',{detail:{clientId:route?.clientId}}));
+}

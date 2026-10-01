@@ -1,10 +1,10 @@
 # Bloqueios e pendências de validação
 
-Atualizado em: 2026-09-30T17:10:47Z
+Atualizado em: 2026-10-01T15:56:18Z
 
 Responsável: Codex/ECC
 
-Base inspecionada: `ddd1bb97f20783b93970aa57e3e2bfaefc0446f2` (`origin/main`)
+Base inspecionada: `077ac9fcbe17b3da3348242b2dd863877d47eee3` (`main` local)
 
 Status: aberto
 
@@ -72,4 +72,30 @@ Desbloqueio: reconfirmar disponibilidade, validade do banco e revisão implantad
 
 ## Encerramento de um item
 
+## Adendo de validação — 2026-10-01T14:12:38Z — Codex/ECC
+
+Referência: PRG-003. Os relatos originais acima descrevem a revisão anterior; não são a descrição do código conciliado atual. Todos os itens permanecem abertos para aceite completo.
+
+- BLK-001: storage por API/usuário, quarentena, escopo de requests e limpeza da UI incorporados. Testes A → logout → B, resposta tardia/401, fila e mapa/GPS passaram com doubles. Falta navegador real e cobertura das interfaces adicionais da main, incluindo controles inteligentes, assinante/admin e abas reais.
+- BLK-002: fila de ciclo de vida da rota incorporada; criação offline, progresso/conclusão, reconnect, resposta perdida e retry passaram com doubles. HTTP/PostgreSQL confirmou identidade única, quotas e estado terminal. Falta validar cliente real offline até outro dispositivo e entregas na mesma jornada.
+- BLK-003: preflight local permitido e rejeitado testados na API atual. Rejeição sem allow-origin retorna 500, comportamento preservado da main. Configuração implantada e origens PWA/APK continuam nao_verificado.
+- BLK-004: snapshots, fila de progresso e estados finais preservados; testes isolados passaram. A API de rota ativa ainda pode retornar null e syncActiveRoute preservar cache local sem confirmar o estado remoto final; investigar essa retomada entre dispositivos na TASK-002. Nenhuma evidência física nesta tarefa.
+- BLK-005: ambiente de testes local disponível e atualizado; infraestrutura/expiração do banco de produção e revisão implantada não consultadas. Não houve deploy.
+
 Preservar descrição original. Acrescentar data, responsável, status resolvido/descartado e teste/evidência que sustenta o encerramento, com referência ao progresso. Falta de reprodução isoladamente não prova correção.
+
+## BLK-004 — Adendo TASK-005 — 2026-10-01T15:49:26Z
+
+Responsável: Codex/ECC | Status: aberto para validação manual | Evidência: validado_por_teste, PRG-005.
+
+Corrigida a preservação incondicional do cache diante de null remoto: ausência válida confirmada e sem pendências limpa rota ativa/UI; erro de rede, HTTP ou JSON mantém cache. Edição/nova rota durante consulta e troca de conta são protegidas. Estado terminal conflitante fecha retomada e preserva snapshot offline na fila bloqueada. Regressões passaram nos dois sistemas/versões Node, incluindo UI com doubles.
+
+O risco de código registrado no adendo anterior foi tratado, sem afirmar aceite físico. Ainda validar duas sessões/dispositivos reais, abrir/fechar/reconectar, encerramento remoto com e sem fila e revisão visível do conflito. BLK-001, BLK-002, BLK-003 e BLK-005 mantêm pendências anteriores. Não houve produção/deploy.
+
+## BLK-006 — Achados high na auditoria de dependências
+
+Data: 2026-10-01T15:56:18Z | Responsável: Codex/ECC | Status: aberto.
+
+Evidência: relatório npm audit do [run remoto 36887757820](https://github.com/turlang/routeflow/actions/runs/36887757820), 3 achados high em deepmerge-ts, @prisma/config e prisma ([GHSA-ggr8-5vv4-36mx](https://github.com/advisories/GHSA-ggr8-5vv4-36mx)). Critério crítico existente preservado: auditoria retornou success. O relatório sugere alteração incompatível via --force; nenhuma atualização automática foi aplicada.
+
+Desbloqueio: avaliar exposição e uma atualização compatível do conjunto Prisma em tarefa própria, testar geração/migrações/API e repetir audit. Não confundir check aprovado no limiar critical com ausência de achados high. Fora da correção de retomada; sem alteração de produção.
